@@ -3,6 +3,7 @@
     import Announcements from "../components/Announcements.svelte";
     import HighlightedSites from "../components/HighlightedSites.svelte";
     import Newsletter from "../components/Newsletter.svelte";
+    import Vudoo from "../components/Vudoo.svelte";
 </script>
 
 <Navbar />
@@ -44,14 +45,28 @@
 
 <Announcements />
 
-<div class="md:w-1/3 relative z-10 flex justify-center">
-    <img 
-      src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExdjVvY204azNkYWtuNzNrZ2YxNDg0cnFuZHh6NjRoeWJiZm4xaTJrdSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/jsNxmqtYu7iLACiP5f/giphy.gif" 
-      alt="AI search GIF"
-      class="w-full max-w-xs mx-auto md:mx-0 rounded shadow-lg"
-    />
-  </div>
+<div class="flex flex-row">
+    <div class="md:w-1/3 relative z-10 flex justify-center">
+        <img 
+          src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExdjVvY204azNkYWtuNzNrZ2YxNDg0cnFuZHh6NjRoeWJiZm4xaTJrdSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/jsNxmqtYu7iLACiP5f/giphy.gif" 
+          alt="AI search GIF"
+          class="w-full max-w-xs mx-auto md:mx-0 rounded shadow-lg"
+        />
+    </div>
+    <div class="flex justify-end w-full mr-10">
+        <div class="flex flex-col">
+            <p>dmifvojijoi34fjecm9034fie2i03f0309if0fi</p>
+            <p>eoiwfj9i04k09ip,poK()U(*G^%Tjkpo0392idkiowniu)</p>
+            <p> ejkwn8uh%R*OIUJ&*T^nekjnf98</p>
+            <p>dsklncuihe87jklNT^R*UJIh789hui^%Rs</p>
+            </div>
+    </div>
+</div>
 
 <HighlightedSites />
 
 <p class="text-white">Kilroy Was Here!</p>
+
+<Vudoo />
+
+<p class="text-white m-10">They are watching they us everywhere. In the walls up the walls. Bagels... I see them in my dreams they call me.</p>
