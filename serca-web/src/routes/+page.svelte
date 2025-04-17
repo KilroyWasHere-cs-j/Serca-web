@@ -1,107 +1,125 @@
 <script lang="ts">
-    import Navbar from "../components/Navbar.svelte";
-    import Announcements from "../components/Announcements.svelte";
-    import HighlightedSites from "../components/HighlightedSites.svelte";
-    import Newsletter from "../components/Newsletter.svelte";
-    import Vudoo from "../components/Vudoo.svelte";
+  import Navbar from "../components/Navbar.svelte";
+  import Announcements from "../components/Announcements.svelte";
+  import HighlightedSites from "../components/HighlightedSites.svelte";
+  import Newsletter from "../components/Newsletter.svelte";
+  import Vudoo from "../components/Vudoo.svelte";
 </script>
 
 <Navbar />
 
-<!-- Main Section with Red Bars on Sides and Flashing Text -->
-<div class="flex flex-col md:flex-row items-center justify-center py-10 gap-8 text-center md:text-left">
+<div class="max-w-5xl mx-auto py-10 px-4 font-mono text-gray-900 bg-gradient-to-b from-gray-100 via-white to-gray-200 border-x border-gray-400 shadow-md">
 
-  <!-- Left Red Bar -->
-  <div class="hidden md:block w-4 bg-red-600 h-full absolute left-0 top-0 bottom-0 animate-pulse"></div>
+  <!-- Title -->
+  <h1 class="text-4xl text-center font-bold text-blue-900 mb-2">Serca: AI-Powered Media Search Engine</h1>
+  <p class="italic text-center text-gray-700 mb-6">"We find what the internet forgot"</p>
 
-  <!-- Text Content -->
-  <div class="md:w-1/2 relative z-10 bg-black p-6 rounded-xl border-4 border-yellow-500 shadow-lg">
-    <h1 class="text-4xl text-white font-serif mb-4 text-shadow animate-bounce">Serca: AI powered media search engine</h1>
-    <p class="font-serif text-lg text-white italic text-shadow animate-pulse">"We find what the internet forgot"</p>
-  </div>
-  
-  <!-- GIF -->
-  <div class="md:w-1/3 relative z-10">
-    <img 
-      src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExazhvZHBmMmwzYWdkcXQ2dndpZmY4Mzdob3B1azFvYWV6YmExbG4wdSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/ZZLzLZjzL1m9XWGjAG/giphy.gif" 
-      alt="AI search GIF"
-      class="w-full max-w-xs mx-auto md:mx-0 rounded-lg shadow-xl animate-spin"
-    />
+  <!-- Table of Contents -->
+  <div class="bg-yellow-100 border border-yellow-400 p-4 mb-10 rounded-md shadow-sm">
+    <h2 class="text-xl font-bold text-teal-800 mb-2">🧭 Table of Contents</h2>
+    <ul class="list-disc list-inside space-y-1 text-blue-700">
+      <li><a href="#what-is-serca" class="hover:underline">What is Serca?</a></li>
+      <li><a href="#how-it-works" class="hover:underline">How It Works</a></li>
+      <li><a href="#sample-queries" class="hover:underline">Sample Queries</a></li>
+      <li><a href="#data-strings" class="hover:underline">Raw Data Strings</a></li>
+      <li><a href="#highlighted-sites" class="hover:underline">Highlighted Sites</a></li>
+    </ul>
   </div>
 
-  <!-- Right Red Bar -->
-  <div class="hidden md:block w-4 bg-red-600 h-full absolute right-0 top-0 bottom-0 animate-pulse"></div>
-  
+  <!-- What is Serca -->
+  <section id="what-is-serca" class="mb-12">
+    <h2 class="text-2xl font-bold text-purple-800 underline mb-2">What is Serca?</h2>
+    <p>
+      Serca is a specialized media search engine that leverages advanced AI to find forgotten or hard-to-describe content.
+      Built to search images, video, audio and more through natural language.
+    </p>
+  </section>
+
+  <!-- How It Works -->
+  <section id="how-it-works" class="mb-12">
+    <h2 class="text-2xl font-bold text-purple-800 underline mb-2">How It Works</h2>
+    <ul class="list-disc list-inside text-gray-800">
+      <li>Neural embeddings trained on public archives</li>
+      <li>Multimodal indexing (image, audio, video)</li>
+      <li>Uses vector search and prompt tuning</li>
+    </ul>
+  </section>
+
+  <!-- Sample Queries -->
+  <section id="sample-queries" class="mb-12">
+    <h2 class="text-2xl font-bold text-purple-800 underline mb-2">Sample Queries</h2>
+    <div class="bg-white border border-gray-300 p-4 font-mono text-sm text-gray-800 shadow-inner">
+      <pre>
+> "vintage footage of people ice skating"
+> "an old TV commercial for a 90s toy"
+> "someone ranting in a grainy YouTube video"
+      </pre>
+    </div>
+  </section>
+
+  <!-- Raw Strings -->
+  <section id="data-strings" class="mb-12">
+    <h2 class="text-2xl font-bold text-purple-800 underline mb-2">Raw Data Strings</h2>
+    <div class="bg-gray-100 border border-gray-400 p-4 font-mono text-sm">
+      <ul class="list-disc list-inside space-y-1">
+        <li>dmifvojijoi34fjecm9034fie2i03f0309if0fi</li>
+        <li>eoiwfj9i04k09ip,poK()U(*G^%Tjkpo0392idkiowniu)</li>
+        <li>ejkwn8uh%R*OIUJ&*T^nekjnf98</li>
+        <li>dsklncuihe87jklNT^R*UJIh789hui^%Rs</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Highlighted Sites -->
+  <section id="highlighted-sites" class="mb-12">
+    <HighlightedSites />
+  </section>
+
+  <!-- Final Note -->
+  <p class="text-center text-base text-gray-600 italic font-serif mt-8 mb-4">Kilroy Was Here!</p>
 </div>
 
-<hr class="my-10 border-t-4 border-green-600 w-1/2 mx-auto rounded-xl shadow-xl animate-pulse">
-
-<!-- What is Serca Section with a Flashing Text -->
-<div class="text-center py-8 bg-gradient-to-r from-blue-500 via-green-500 to-purple-500">
-  <h2 class="text-4xl font-serif mb-3 text-shadow animate-flash">What is Serca</h2>
-  <p class="font-serif text-lg max-w-2xl mx-auto text-shadow animate-flash">Serca is an AI-powered media search engine, allowing you to search media by describing it in plain text.</p>
-</div>
-
+<!-- Newsletter -->
 <Newsletter />
 
-<Announcements />
-
-<!-- 2000s Styled GIF Section with Tacky Backgrounds -->
-<div class="flex flex-row bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 p-4 rounded-xl shadow-lg animate-pulse">
-    <div class="md:w-1/3 relative z-10 flex justify-center">
-        <img 
-          src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExdjVvY204azNkYWtuNzNrZ2YxNDg0cnFuZHh6NjRoeWJiZm4xaTJrdSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/jsNxmqtYu7iLACiP5f/giphy.gif" 
-          alt="AI search GIF"
-          class="w-full max-w-xs mx-auto md:mx-0 rounded-xl shadow-2xl animate-ping"
-        />
-    </div>
-    <div class="flex justify-end w-full mr-10 text-white text-lg font-serif">
-        <div class="flex flex-col">
-            <p class="bg-gray-900 p-2 rounded-lg mb-2 shadow-lg animate-pulse">dmifvojijoi34fjecm9034fie2i03f0309if0fi</p>
-            <p class="bg-gray-900 p-2 rounded-lg mb-2 shadow-lg animate-pulse">eoiwfj9i04k09ip,poK()U(*G^%Tjkpo0392idkiowniu)</p>
-            <p class="bg-gray-900 p-2 rounded-lg mb-2 shadow-lg animate-pulse"> ejkwn8uh%R*OIUJ&*T^nekjnf98</p>
-            <p class="bg-gray-900 p-2 rounded-lg mb-2 shadow-lg animate-pulse">dsklncuihe87jklNT^R*UJIh789hui^%Rs</p>
-        </div>
-    </div>
+<!-- Announcements -->
+<div class="max-w-5xl mx-auto mt-6 px-4">
+  <Announcements />
 </div>
 
-<HighlightedSites />
-
-<p class="text-center text-2xl text-white font-serif mt-4 text-shadow animate-flash">Kilroy Was Here!</p>
-
+<!-- Footer -->
 <Vudoo />
 
-<!-- Flashing Text Animation -->
 <style>
-  @keyframes flash {
-    0% { color: red; }
-    50% { color: yellow; }
-    100% { color: green; }
-  }
-  
-  .animate-flash {
-    animation: flash 1s infinite;
+  body {
+    background-color: #d8a6c7; /* Piss Purple Background */
+    font-family: 'Courier New', Courier, monospace;
+    color: #222;
   }
 
-  .animate-bounce {
-    animation: bounce 1s infinite;
+  a {
+    color: #0044aa;
   }
 
-  .animate-spin {
-    animation: spin 3s infinite;
+  a:hover {
+    color: #000;
+    background-color: #ffe;
   }
 
-  .animate-pulse {
-    animation: pulse 1s infinite;
+  pre {
+    background-color: #f9f9f9;
+    padding: 0.5rem;
+    overflow-x: auto;
+    font-family: 'Courier New', Courier, monospace;
   }
 
-  .animate-ping {
-    animation: ping 1s infinite;
+  h2 {
+    border-left: 4px solid #ccc;
+    padding-left: 0.5rem;
   }
 
-  /* Text Shadow */
-  .text-shadow {
-    text-shadow: 2px 2px 5px #FF00FF, 0 0 25px #FF00FF, 0 0 5px #FF00FF;
+  /* Subtle highlight effect */
+  ul li:hover {
+    background-color: #f0f0f0;
   }
 </style>
-

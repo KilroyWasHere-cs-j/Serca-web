@@ -1,74 +1,78 @@
+<script>
+  // An array of cool URLs
+  export let coolLinks = [
+    { title: "Classic Reddit", url: "https://www.reddit.com" },
+    { title: "Early Web Aesthetics", url: "https://www.oldweb.today" },
+    { title: "4chan", url: "https://www.4chan.org" },
+    { title: "Craigslist", url: "https://www.craigslist.org" },
+    { title: "ASCII Art Archive", url: "https://www.asciiart.eu" }
+  ];
+</script>
+
 <style>
-    /* 2000s Gradient Background */
-    .blue-yellow-bg {
-      background: linear-gradient(45deg, #0057b7 50%, #ffd700 50%);
-      background-size: 400% 400%;
-      animation: gradient 5s ease infinite;
-    }
-  
-    /* Retro Text with Pixelated Font */
-    .pixel-font {
-      font-family: "Courier New", monospace;
-      font-size: 18px;
-      letter-spacing: 2px;
-      text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.6);
-    }
-  
-    /* Hoverable Link Style */
-    .highlighted-link {
-      color: #ffd700;
-      text-decoration: underline;
-      font-weight: bold;
-      transition: all 0.3s ease-in-out;
-    }
-  
-    .highlighted-link:hover {
-      color: #0057b7;
-      text-decoration: none;
-      background-color: #ffd700;
-      padding: 5px 10px;
-      border-radius: 5px;
-    }
-  
-    /* Border Boxes for 2000s Style */
-    .retro-box {
-      border: 3px solid #ffd700;
-      padding: 15px;
-      margin: 10px;
-      background-color: #0057b7;
-      color: white;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-    }
-  
-    /* Animation for Gradient Background */
-    @keyframes gradient {
-      0% {
-        background-position: 0% 50%;
-      }
-      50% {
-        background-position: 100% 50%;
-      }
-      100% {
-        background-position: 0% 50%;
-      }
-    }
-  </style>
-  
-  <div class="flex flex-col m-4 bg-blue-400">
-    <!-- Title with retro text and underline -->
-    <h1 class="flex justify-center text-4xl text-blue-600 mt-6 font-serif p-2 underline pixel-font">
-      Highlighted Sites
-    </h1>      
-    
-    <!-- Content Section with Retro Box and Yellow Background -->
-    <div class="flex justify-center p-2 bg-yellow-400 retro-box">
-      <ul class="flex flex-col space-y-3">
-        <li class="highlighted-link">- Natural language media search</li>
-        <li class="highlighted-link">- Supports image, video, and audio formats</li>
-        <li class="highlighted-link">- Find content even when metadata is missing</li>
-        <li class="highlighted-link">- AI-powered content understanding</li>
-        <li class="highlighted-link">- Fast and accurate search results</li>
-      </ul>
-    </div>
-  </div>
-  
+  /* Similar early web-style typography and design */
+  :global(body) {
+    font-family: 'Courier New', Courier, monospace;
+    background-color: #f2f2f2;
+    color: #333;
+    margin: 0;
+    padding: 0;
+  }
+
+  .links-container {
+    width: 80%;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #fff;
+    border: 2px solid #ddd;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .links-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #2b2b2b;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 10px;
+  }
+
+  .links-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .link-item {
+    padding: 8px;
+    font-size: 16px;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .link-item a {
+    color: #0066cc;
+    text-decoration: underline;
+  }
+
+  .link-item a:hover {
+    color: #003366;
+  }
+
+  /* Additional spacing for the container */
+  .links-container {
+    border-radius: 4px;
+    padding: 15px;
+  }
+</style>
+
+<div class="links-container">
+  <div class="links-title">Cool Links from the Early Web</div>
+  <ul class="links-list">
+    {#each coolLinks as { title, url }}
+      <li class="link-item">
+        <a href={url} target="_blank" rel="noopener noreferrer">{title}</a>
+      </li>
+    {/each}
+  </ul>
+</div>
