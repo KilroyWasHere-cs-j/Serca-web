@@ -9,7 +9,7 @@
   <!-- Header -->
   <div style="text-align: center; margin-bottom: 40px;">
     <h1 style="font-size: 32px; font-weight: normal; color: #003366; margin-bottom: 10px;">SercaDB</h1>
-    <p style="font-size: 16px; font-style: italic; color: #666;">"Built for scale. Designed for chaos."</p>
+    <p style="font-size: 16px; font-style: italic; color: #666;">"Built for storing video descriptions, capable of storing pie recipes."</p>
   </div>
 
   <!-- Table of Contents -->
@@ -35,38 +35,77 @@
   <section id="architecture" style="margin-bottom: 40px;">
     <h2 style="font-size: 22px; font-weight: normal; color: #6A1B9A; margin-bottom: 10px;">🛠️ Architecture Overview</h2>
     <p style="font-size: 16px; line-height: 1.8; color: #444;">
-      Serca's database is a centralized Sql based database with a Sqlx powered Rust API.
+      Serca's database is a centralized cloud hosted postgres database with a Sqlx powered Rust API. This allows us to leverage the power 
+      of TSQL and Rust to build a speedy and safe database experience. 
     </p>
 
-    <p>Presently this doesn't mean anything</p>
+    <br>
+    <br>
+
+    <h3 class="text-2xl">Data table peak</h3>
+    <p>This is a snipit of our database. Please note that that data in the this table is ust dummy don't put too much stock into it!</p>
     <div style="margin-top: 24px; padding: 16px; background-color: #f4f4f4; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; white-space: pre-wrap;">
-      <code style="font-family: 'Courier New', Courier, monospace;">
-        ┌──────────────┐<br/>
-        │  Client API  │<br/>
-        └─────┬────────┘<br/>
-              ↓<br/>
-        ┌──────────────┐<br/>
-        │ Query Router │<br/>
-        └─────┬────────┘<br/>
-              ↓<br/>
-        ┌──────────────┐<br/>
-        │  Compute     │<br/>
-        │  Engine      │<br/>
-        └─────┬────────┘<br/>
-              ↓<br/>
-        ┌──────────────┐<br/>
-        │  Storage     │<br/>
-        │ (LSM + Log)  │<br/>
-        └──────────────┘
-      </code>
+      <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>URL</th>
+                <th>Description</th>
+                <th>Special one</th>
+                <th>Special two</th>
+                <th>Flag</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>0</td>
+                <td>https://serca.dev/one</td>
+                <td>Something kinda important</td>
+                <td>false</td>
+                <td>true</td>
+                <td>green</td>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td>https://serca.dev/two</td>
+                <td>People dancing with a dog in a barn</td>
+                <td>true</td>
+                <td>false</td>
+                <td>grey</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>https://serca.dev/three</td>
+                <td>Kids swiming in a pool</td>
+                <td>false</td>
+                <td>false</td>
+                <td>red</td>
+            </tr>
+        </tbody>
+    </table>
     </div>
   </section>
 
   <!-- API -->
   <section id="api" style="margin-bottom: 40px;">
     <h2 style="font-size: 22px; font-weight: normal; color: #6A1B9A; margin-bottom: 10px;">📦 API</h2>
-    <p>API stuff</p>
-  </section>
+    <p>
+      Although it's not public available yet we have an API. We will add more information here
+      as we build it out and make it public. 
+    </p>
+
+    <br>
+    <br>
+
+    <!-- <h2>API samples</h2>
+    <div class="bg-white border border-gray-300 p-4 font-mono text-sm text-gray-800 shadow-inner">
+      <pre>
+> https://serca.dev/api/getrec
+> 
+> "animals"
+      </pre>
+    </div>
+  </section> -->
 
   <!-- Final Note -->
   <div style="text-align: center; margin-top: 40px;">
@@ -103,5 +142,25 @@
 
   ul li:hover {
     background-color: #f0f0f0;
+  }
+
+  table {
+    width: 50%;
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 18px;
+    text-align: left;
+  }
+
+  table, th, td {
+    border: 1px solid black;
+  }
+  
+  th, td {
+    padding: 12px;
+  }
+
+  th {
+    background-color: #f2f2f2;
   }
 </style>
