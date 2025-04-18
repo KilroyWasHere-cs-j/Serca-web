@@ -8,7 +8,7 @@
 
   <!-- Header -->
   <div style="text-align: center; margin-bottom: 40px;">
-    <h1 style="font-size: 32px; font-weight: normal; color: #003366; margin-bottom: 10px;">VudooDB: High-Performance Distributed Database</h1>
+    <h1 style="font-size: 32px; font-weight: normal; color: #003366; margin-bottom: 10px;">SercaDB</h1>
     <p style="font-size: 16px; font-style: italic; color: #666;">"Built for scale. Designed for chaos."</p>
   </div>
 
@@ -16,32 +16,29 @@
   <div style="background-color: #f9f9f9; border: 1px solid #e0e0e0; padding: 20px; margin-bottom: 40px; border-radius: 8px;">
     <h2 style="font-size: 18px; font-weight: normal; color: #006666; margin-bottom: 10px;">🧭 Table of Contents</h2>
     <ul style="list-style-type: disc; margin-left: 20px; font-size: 16px; color: #003366;">
-      <li><a href="#key-features" style="text-decoration: none; color: #003366;">Key Features</a></li>
+      <li><a href="#overview" style="text-decoration: none; color: #003366;">Overview</a></li>
       <li><a href="#architecture" style="text-decoration: none; color: #003366;">Architecture Overview</a></li>
-      <li><a href="#use-cases" style="text-decoration: none; color: #003366;">Use Cases</a></li>
+      <li><a href="#api" style="text-decoration: none; color: #003366;">API</a></li>
     </ul>
   </div>
 
-  <!-- Key Features -->
-  <section id="key-features" style="margin-bottom: 40px;">
-    <h2 style="font-size: 22px; font-weight: normal; color: #6A1B9A; margin-bottom: 10px;">💾 Key Features</h2>
-    <ul style="list-style-type: disc; margin-left: 20px; font-size: 16px; line-height: 1.8; color: #333;">
-      <li>Eventual Consistency with Tunable Consistency Levels</li>
-      <li>Blazing fast query engine using SIMD optimization</li>
-      <li>Supports hybrid cloud-native deployments</li>
-      <li>Native support for unstructured blob + JSON data</li>
-      <li>Built-in end-to-end encryption (FIPS-140-2 compliant)</li>
-    </ul>
+  <!-- Overview -->
+  <section id="overview" style="margin-bottom: 40px;">
+    <h2 style="font-size: 22px; font-weight: normal; color: #6A1B9A; margin-bottom: 10px;">💾 Overview</h2>
+    <p>
+      We are managing an expanding database that links media URLs to automatically generated descriptions. 
+      As our AI engines produce new descriptions for media content, we continuously update the database by adding new URL-description pairs.
+    </p>
   </section>
 
   <!-- Architecture Overview -->
   <section id="architecture" style="margin-bottom: 40px;">
     <h2 style="font-size: 22px; font-weight: normal; color: #6A1B9A; margin-bottom: 10px;">🛠️ Architecture Overview</h2>
     <p style="font-size: 16px; line-height: 1.8; color: #444;">
-      VudooDB is a distributed key-value and document store optimized for low-latency access and horizontal scaling. The core engine is written in Rust, powered by an append-only log and an LSM-tree storage layer.
-      It uses a gossip protocol for cluster coordination and Raft for consensus on critical control paths.
+      Serca's database is a centralized Sql based database with a Sqlx powered Rust API.
     </p>
 
+    <p>Presently this doesn't mean anything</p>
     <div style="margin-top: 24px; padding: 16px; background-color: #f4f4f4; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; white-space: pre-wrap;">
       <code style="font-family: 'Courier New', Courier, monospace;">
         ┌──────────────┐<br/>
@@ -65,20 +62,15 @@
     </div>
   </section>
 
-  <!-- Use Cases -->
-  <section id="use-cases" style="margin-bottom: 40px;">
-    <h2 style="font-size: 22px; font-weight: normal; color: #6A1B9A; margin-bottom: 10px;">📦 Use Cases</h2>
-    <ul style="list-style-type: disc; margin-left: 20px; font-size: 16px; line-height: 1.8; color: #333;">
-      <li>Massive-scale IoT telemetry ingestion</li>
-      <li>High-frequency trading data pipelines</li>
-      <li>Secure medical records & compliance storage</li>
-      <li>Real-time analytics for global apps</li>
-    </ul>
+  <!-- API -->
+  <section id="api" style="margin-bottom: 40px;">
+    <h2 style="font-size: 22px; font-weight: normal; color: #6A1B9A; margin-bottom: 10px;">📦 API</h2>
+    <p>API stuff</p>
   </section>
 
   <!-- Final Note -->
   <div style="text-align: center; margin-top: 40px;">
-    <p style="font-size: 16px; font-style: italic; color: #777;">Kilobytes? Please. VudooDB speaks in petabytes.</p>
+    <p style="font-size: 16px; font-style: italic; color: #777;">SQL is magic...</p>
   </div>
 
 </div>

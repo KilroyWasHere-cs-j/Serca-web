@@ -80,7 +80,7 @@
 <div class="container">
   <div>
     <h1 class="retro-font">Who are we?</h1>
-    <p class="retro-font">
+    <p class="retro-font text-4xl">
       We are 
       <a href="https://www.vudoogroup.dev/" class="simple-link">
         Vudoo Group
@@ -93,6 +93,6 @@
     <p class="retro-font">
       Welcome to the future, where technology and simplicity meet.
     </p>
-    <a href="#" class="simple-button">Click Me!</a>
+    <a href="https://www.vudoogroup.dev/" class="simple-button">Click Me!</a>
   </div>
 </div>

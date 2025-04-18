@@ -1,7 +1,8 @@
 <script>
-  export let title = "Important Announcement";
+  export let title = "Announcements";
   export let date = "April 17, 2025";
-  export let content = "This is a placeholder for the announcement text. Here you can put any important information you'd like to announce!";
+  export let type = "Development";
+  export let content = "Null text";
 </script>
 
 <style>
@@ -66,9 +67,10 @@
 <div class="announcement-container">
   <div class="announcement-title">{title}</div>
   <div class="announcement-meta">
-    <span>{date}</span> | <a href="#">More info...</a>
+    <span>{date}</span> | <span>{type}</span>
   </div>
   <div class="announcement-content">
     {content}
+    <p>- Vudoo Group</p>
   </div>
 </div>

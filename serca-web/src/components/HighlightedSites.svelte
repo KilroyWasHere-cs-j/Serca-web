@@ -1,11 +1,11 @@
 <script>
   // An array of cool URLs
   export let coolLinks = [
-    { title: "Classic Reddit", url: "https://www.reddit.com" },
-    { title: "Early Web Aesthetics", url: "https://www.oldweb.today" },
-    { title: "4chan", url: "https://www.4chan.org" },
-    { title: "Craigslist", url: "https://www.craigslist.org" },
-    { title: "ASCII Art Archive", url: "https://www.asciiart.eu" }
+    { title: "Classic Reddit", url: "https://www.reddit.com", note: "Not really cool, but adding filler"},
+    { title: "The Old Internet", url: "https://theoldnet.com/", note: "A cool collection of old archived websites"},
+    { title: "4chan", url: "https://www.4chan.org", note: "Well this was cool til it got hacked"},
+    { title: "Craigslist", url: "https://www.craigslist.org", note: "This is a modern site that looks old"},
+    { title: "ASCII Art Archive", url: "https://www.asciiart.eu", note: "ASCII art is cool, man..."}
   ];
 </script>
 
@@ -68,10 +68,12 @@
 
 <div class="links-container">
   <div class="links-title">Cool Links from the Early Web</div>
+  <p>As we find cool new links to checkout. Follow at your own risk.</p>
   <ul class="links-list">
-    {#each coolLinks as { title, url }}
+    {#each coolLinks as { title, url, note}}
       <li class="link-item">
         <a href={url} target="_blank" rel="noopener noreferrer">{title}</a>
+        <p>{note}</p>
       </li>
     {/each}
   </ul>
