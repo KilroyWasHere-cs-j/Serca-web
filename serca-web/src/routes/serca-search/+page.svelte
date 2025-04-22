@@ -4,10 +4,18 @@
 	let query = '';
 	let query_valid = true;
 	let sql_detected = false;
+	let html_detected = false;
+	let cooldown = false;
+
 	const regex = /^[A-Za-z0-9\s.,!?'"():;\-\/&]+$/;
 	const sqlRegex = /\b(SELECT|INSERT|UPDATE|DELETE|DROP|ALTER|CREATE|EXEC|UNION|WHERE|FROM)\b/i;
+	const htmlTagRegex = /<[^>]*>/g;
 
 	function handleSearch() {
+		if (cooldown) return;
+		cooldown = true;
+		setTimeout(() => (cooldown = false), 3000);
+
 		if (!regex.test(query)) {
 			query_valid = false;
 			query = '';
@@ -18,8 +26,15 @@
 			query = '';
 			return;
 		}
+		if (htmlTagRegex.test(query)) {
+			html_detected = true;
+			query = '';
+			return;
+		}
+
 		query_valid = true;
 		sql_detected = false;
+		html_detected = false;
 		console.log('Search valid');
 	}
 </script>
@@ -49,6 +64,19 @@
 		</div>
 	{/if}
 
+	{#if html_detected == true}
+		<div class="m-8 border border-gray-600 bg-pink-600 p-8">
+			<h1 class="flex justify-center text-2xl font-bold">Potential HTML scripting detected.</h1>
+			<p>We do not allow for html searching</p>
+		</div>
+	{/if}
+
+	{#if html_detected == cooldown}
+		<div class="m-8 border border-gray-600 bg-pink-600 p-8">
+			<h1 class="flex justify-center text-2xl font-bold">Slow down bro...</h1>
+			<p>In order to prevent rate attacks we gonna pause you for a sec</p>
+		</div>
+	{/if}
 	<!-- Centered Search Box -->
 	<div class="w-full max-w-xl border border-gray-600 bg-white p-8 text-center">
 		<h1 class="retro-font mb-6 text-4xl text-gray-800">Serca Search</h1>
