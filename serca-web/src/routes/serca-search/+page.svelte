@@ -1,5 +1,11 @@
 <script lang="ts">
 	import Navbar from '../../components/Navbar.svelte';
+	import ResultBox from '../../components/ResultBox.svelte';
+
+	// Groq
+
+	let prompt = '';
+	let response = '';
 
 	let query = '';
 	let query_valid = true;
@@ -36,6 +42,20 @@
 		sql_detected = false;
 		html_detected = false;
 		console.log('Search valid');
+	}
+
+	async function sendPrompt() {
+		prompt += ' ' + query;
+		const res = await fetch('/api/groq-chat', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ prompt })
+		});
+
+		const data = await res.json();
+		response = data.response;
 	}
 </script>
 
@@ -96,6 +116,11 @@
 		</button>
 
 		<p class="retro-font mt-6 text-gray-600 italic">"We find what the internet forgot"</p>
+	</div>
+
+	<div class="m-8 border border-gray-600 bg-white p-8">
+		<h1 class="retro-font text-gray-600 italic">We found...</h1>
+		<ResultBox />
 	</div>
 </div>
 
