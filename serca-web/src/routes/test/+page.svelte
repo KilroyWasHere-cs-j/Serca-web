@@ -15,13 +15,7 @@
 		const data = await res.json();
 		response = data.response;
 	}
-
-	let data_db = [];
-
-	onMount(async () => {
-		const res = await fetch('/api/data');
-		data_db = await res.json();
-	});
+	export let data;
 </script>
 
 <h1 class="flex justify-center">Testing page</h1>
@@ -30,6 +24,5 @@
 <button on:click={sendPrompt}>Send</button>
 <pre>{response}</pre>
 
-{#each data_db as row}
-	<p>{JSON.stringify(row)}</p>
-{/each}
+<h1>Database Version</h1>
+<p>{data.version}</p>
