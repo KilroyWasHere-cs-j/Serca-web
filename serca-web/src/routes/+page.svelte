@@ -5,9 +5,13 @@
 	import Newsletter from '../components/Newsletter.svelte';
 	import Vudoo from '../components/Vudoo.svelte';
 	import { injectAnalytics } from '@vercel/analytics/sveltekit';
+
+	export let data;
 </script>
 
 <Navbar />
+
+<p>{data.result}</p>
 
 <div
 	class="mx-auto max-w-5xl border-x border-gray-400 bg-gradient-to-b from-gray-100 via-white to-gray-200 px-4 py-10 font-mono text-gray-900 shadow-md"

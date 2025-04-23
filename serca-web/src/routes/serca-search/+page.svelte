@@ -57,6 +57,8 @@
 		const data = await res.json();
 		response = data.response;
 	}
+
+	export let data;
 </script>
 
 <Navbar />
