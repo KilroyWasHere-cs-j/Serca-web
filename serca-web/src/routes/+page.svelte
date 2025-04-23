@@ -5,13 +5,9 @@
 	import Newsletter from '../components/Newsletter.svelte';
 	import Vudoo from '../components/Vudoo.svelte';
 	import { injectAnalytics } from '@vercel/analytics/sveltekit';
-
-	export let data;
 </script>
 
 <Navbar />
-
-<p>{data.result}</p>
 
 <div
 	class="mx-auto max-w-5xl border-x border-gray-400 bg-gradient-to-b from-gray-100 via-white to-gray-200 px-4 py-10 font-mono text-gray-900 shadow-md"
@@ -81,7 +77,7 @@
 	<section id="api" class="mb-12">
 		<h2 class="mb-2 text-2xl font-bold text-purple-800 underline">Serca API</h2>
 		<div class="border border-gray-400 bg-gray-100 p-4 font-mono text-sm">
-			<p>We host an API. <strong>Not currently open to public.</strong></p>
+			<p>We will host an API. <strong>Not currently open to public.</strong></p>
 		</div>
 	</section>
 
@@ -102,7 +98,16 @@
 <!-- Announcements -->
 <div class="mx-auto mt-6 max-w-5xl px-4">
 	<Announcements
-		title="Vudoo Group is currently building out this page"
+		title="Serca launches into alpha"
+		date="April 23, 2025"
+		type="Development Milestone"
+		content="Today our search engine and database talked for the first time. We are now officially in the alpha phase.
+		There is definatly a ton of room to grow. For the next weeks we will be working on the following features:
+		* Improved AI description
+		* AI assisted search"
+	/>
+	<Announcements
+		title="Abscissa is currently building out this page"
 		date="April 7, 2025"
 		type="Development"
 		content="We are properly in the development trenches now. We will keep you posted."

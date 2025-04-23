@@ -1,50 +1,37 @@
 <script lang="ts">
+	import { Stream } from 'groq-sdk/lib/streaming.mjs';
 	import Navbar from '../../components/Navbar.svelte';
-	import ResultBox from '../../components/ResultBox.svelte';
 
 	// Groq
 
-	let prompt = '';
 	let response = '';
+	let database = { results: [] };
 
 	let query = '';
-	let query_valid = true;
-	let sql_detected = false;
-	let html_detected = false;
-	let cooldown = false;
 
 	const regex = /^[A-Za-z0-9\s.,!?'"():;\-\/&]+$/;
 	const sqlRegex = /\b(SELECT|INSERT|UPDATE|DELETE|DROP|ALTER|CREATE|EXEC|UNION|WHERE|FROM)\b/i;
 	const htmlTagRegex = /<[^>]*>/g;
 
-	function handleSearch() {
-		if (cooldown) return;
-		cooldown = true;
-		setTimeout(() => (cooldown = false), 3000);
-
+	async function handleSearch() {
+		console.log('Search triggered');
 		if (!regex.test(query)) {
-			query_valid = false;
 			query = '';
 			return;
 		}
 		if (sqlRegex.test(query)) {
-			sql_detected = true;
 			query = '';
 			return;
 		}
 		if (htmlTagRegex.test(query)) {
-			html_detected = true;
 			query = '';
 			return;
 		}
-
-		query_valid = true;
-		sql_detected = false;
-		html_detected = false;
-		console.log('Search valid');
+		database = await searchFromServer(query);
 	}
 
-	async function sendPrompt() {
+	async function sendPrompt(query: string) {
+		let prompt = '';
 		prompt += ' ' + query;
 		const res = await fetch('/api/groq-chat', {
 			method: 'POST',
@@ -55,10 +42,23 @@
 		});
 
 		const data = await res.json();
-		response = data.response;
+		return data.response;
 	}
 
-	export let data;
+	async function searchFromServer(query: string) {
+		console.log('Searching for:', query);
+		const res = await fetch('/api/data/search', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ query })
+		});
+
+		const data_r = await res.json();
+		console.log(data_r);
+		return data_r;
+	}
 </script>
 
 <Navbar />
@@ -68,37 +68,14 @@
 	<!-- Info box -->
 	<div class="m-8 border border-gray-800 bg-yellow-100 p-8">
 		<h1 class="retro-font mb-6 text-4xl text-gray-600">Important Notice</h1>
-		<p>This service is currently not running we will update when it is.</p>
+		<p>
+			This service is still in development. Please be patient. Search at your own risk, not all
+			searches are guaranteed to be accurate, or complete. Searches my result in NSFW content. We
+			will not be held responsible for any content that may be found. We understand the descriptions
+			are lacking and/or a complete lie. We are working on improving the prompts for the AI model.
+		</p>
 	</div>
 
-	<!-- Query is invalid warning -->
-	{#if query_valid == false}
-		<div class="m-8 border border-gray-600 bg-red-700 p-8">
-			<h1 class="flex justify-center text-2xl font-bold">Your query is invalid</h1>
-			<p>Only letters, dashes (-), and exclamation marks (!) are allowed.</p>
-		</div>
-	{/if}
-
-	{#if sql_detected == true}
-		<div class="m-8 border border-gray-600 bg-pink-600 p-8">
-			<h1 class="flex justify-center text-2xl font-bold">Potential SQL keyword detected.</h1>
-			<p>I don't know what your try to do, but it can't be good</p>
-		</div>
-	{/if}
-
-	{#if html_detected == true}
-		<div class="m-8 border border-gray-600 bg-pink-600 p-8">
-			<h1 class="flex justify-center text-2xl font-bold">Potential HTML scripting detected.</h1>
-			<p>We do not allow for html searching</p>
-		</div>
-	{/if}
-
-	{#if html_detected == cooldown}
-		<div class="m-8 border border-gray-600 bg-pink-600 p-8">
-			<h1 class="flex justify-center text-2xl font-bold">Slow down bro...</h1>
-			<p>In order to prevent rate attacks we gonna pause you for a sec</p>
-		</div>
-	{/if}
 	<!-- Centered Search Box -->
 	<div class="w-full max-w-xl border border-gray-600 bg-white p-8 text-center">
 		<h1 class="retro-font mb-6 text-4xl text-gray-800">Serca Search</h1>
@@ -122,7 +99,26 @@
 
 	<div class="m-8 border border-gray-600 bg-white p-8">
 		<h1 class="retro-font text-gray-600 italic">We found...</h1>
-		<ResultBox />
+		<!-- <p>{database.results}</p> -->
+		{#each database.results as row}
+			<div class="m-4 border border-gray-600 bg-white p-4">
+				<h1 class="text-blue-500">
+					<a href={row.url} target="_blank" rel="noopener noreferrer">{row.url}</a>
+				</h1>
+				<p class="m-2 text-gray-600">
+					{row.description}
+				</p>
+				<p class="m-2 rounded bg-orange-500 p-2">
+					{row.mature}
+				</p>
+				<p class="m-2 rounded bg-yellow-500 p-2">
+					{row.child}
+				</p>
+				<p class="m-2 rounded bg-purple-500 p-2">
+					{row.flag}
+				</p>
+			</div>
+		{/each}
 	</div>
 </div>
 
