@@ -76,18 +76,18 @@
 <!-- Fullscreen Centered Page -->
 <div class="flex min-h-screen flex-col items-center justify-center bg-gray-200">
 	<!-- Info box -->
-	<div class="m-8 w-[600px] border border-gray-800 bg-yellow-100 p-8">
+	<div class="info-box m-8 w-full border border-gray-800 bg-yellow-100 p-8 sm:w-[600px]">
 		<h1 class="retro-font mb-6 text-4xl text-gray-600">Important Notice</h1>
 		<p>
 			This service is still in development. Please be patient. Search at your own risk, not all
-			searches are guaranteed to be accurate, or complete. Searches my result in NSFW content. We
+			searches are guaranteed to be accurate, or complete. Searches may result in NSFW content. We
 			will not be held responsible for any content that may be found. We understand the descriptions
 			are lacking and/or are incorrect. We are working on improving the prompts for the AI model.
 		</p>
 	</div>
 
 	<!-- Centered Search Box -->
-	<div class="w-full max-w-xl border border-gray-600 bg-white p-8 text-center">
+	<div class="search-box w-full max-w-xl border border-gray-600 bg-white p-8 text-center">
 		<h1 class="retro-font mb-6 text-4xl text-gray-800">Serca Search</h1>
 
 		<input
@@ -107,7 +107,7 @@
 		<p class="retro-font mt-6 text-gray-600 italic">"We find what the internet forgot"</p>
 	</div>
 
-	<div class="m-8 border border-gray-600 bg-white p-8">
+	<div class="results-box m-8 border border-gray-600 bg-white p-8">
 		<h1 class="retro-font text-gray-600 italic">We found...</h1>
 		<!-- <p>{database.results}</p> -->
 		{#each database.results as row}
@@ -190,5 +190,37 @@
 	h1,
 	p {
 		font-family: 'Courier New', Courier, monospace;
+	}
+
+	/* Responsive styles */
+	@media (max-width: 768px) {
+		.info-box,
+		.search-box,
+		.results-box {
+			width: 100%;
+			padding: 4%;
+		}
+
+		.search-box input {
+			font-size: 14px;
+		}
+	}
+
+	@media (max-width: 480px) {
+		.retro-font {
+			font-size: 14px; /* Adjust font size for smaller screens */
+		}
+
+		.search-box h1 {
+			font-size: 2rem; /* Adjust heading size for smaller screens */
+		}
+
+		.search-box button {
+			width: 100%; /* Make the button full width on smaller screens */
+		}
+
+		.results-box {
+			padding: 16px;
+		}
 	}
 </style>
