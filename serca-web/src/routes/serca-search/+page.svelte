@@ -31,9 +31,12 @@
 		}
 		let groq = await sendPrompt(
 			query,
-			'Extract keywords, just a list of words, no formatting, no other text, seperate the words with a space'
+			'Extract keywords, just a list of words, no formatting, no other text, seperate the words with a space, [video, gif, image, etc...] are not keywords'
 		);
-		console.log('Groq' + groq);
+		const match = groq.match(/<\/think>(.*)/s);
+
+		const afterThink = match ? match[1].trim() : '';
+		console.log('Groq' + afterThink);
 		database = await searchFromServer(query);
 	}
 
