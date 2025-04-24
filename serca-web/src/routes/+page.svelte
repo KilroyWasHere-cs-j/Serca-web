@@ -5,6 +5,47 @@
 	import Newsletter from '../components/Newsletter.svelte';
 	import Vudoo from '../components/Vudoo.svelte';
 	import { injectAnalytics } from '@vercel/analytics/sveltekit';
+
+	let showPopup = false;
+
+	// Check if the "visited" cookie is set
+	function checkFirstVisit() {
+		const visited = getCookie('visited');
+		if (!visited) {
+			showPopup = true;
+		}
+	}
+
+	// Set a cookie
+	function setCookie(name, value, days) {
+		const d = new Date();
+		d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000); // Set expiry date
+		const expires = 'expires=' + d.toUTCString();
+		document.cookie = `${name}=${value}; ${expires}; path=/`;
+	}
+
+	// Get a cookie by name
+	function getCookie(name) {
+		const decodedCookies = decodeURIComponent(document.cookie);
+		const cookieArr = decodedCookies.split(';');
+		for (let i = 0; i < cookieArr.length; i++) {
+			let cookie = cookieArr[i].trim();
+			if (cookie.indexOf(name + '=') === 0) {
+				return cookie.substring(name.length + 1, cookie.length);
+			}
+		}
+		return '';
+	}
+
+	// Call checkFirstVisit when the component is mounted
+	import { onMount } from 'svelte';
+	onMount(() => {
+		checkFirstVisit();
+	});
+
+	function togglePopup() {
+		showPopup = !showPopup;
+	}
 </script>
 
 <Navbar />
@@ -23,6 +64,7 @@
 		<h2 class="mb-2 text-xl font-bold text-teal-800">🧭 Table of Contents</h2>
 		<ul class="list-inside list-disc space-y-1 text-blue-700">
 			<li><a href="#what-is-serca" class="hover:underline">What is Serca?</a></li>
+			<li><a href="#how-does-serca" class="hover:underline">How does this service work?</a></li>
 			<li><a href="#how-it-works" class="hover:underline">How It Works</a></li>
 			<li><a href="#sample-queries" class="hover:underline">Sample Queries</a></li>
 			<li><a href="#api" class="hover:underline">Serca API</a></li>
@@ -38,6 +80,22 @@
 			builds a comprehensive database by gathering URLs and their descriptions, enabling users to
 			search using natural language. This allows for faster, more intuitive, and accurate search
 			results, transforming the way people find information online.
+		</p>
+	</section>
+
+	<!-- How the Serca service will work -->
+	<section id="how-does-serca" class="mb-12">
+		<h2 class="mb-2 text-2xl font-bold text-purple-800 underline">How does this service work?</h2>
+		<p>
+			We are trying our best as transparent as possible. We will maintain a free versi on open for
+			the betterment of the internet, in addition Serca will provide a paid version with additional
+			features and support. This paided service will be tiered, and will allow for enchanced
+			services and searching. The internet is a amazing place and we all love it, but it's not all
+			sunshine and rainbows. Serca will work to implement a flagging system to mark inappropriate
+			content. Such content will not be accessable at the free tier. Paided tiers will be able to
+			view this content. In addition ALL illegal content will be banned and will be reported to the
+			proper authorities. If you have any questions or concerns, please
+			<a href="mailto:gmtower1@gmail.com">contact</a> us.
 		</p>
 	</section>
 
@@ -120,6 +178,25 @@
 	/>
 </div>
 
+{#if showPopup}
+	<div class="overlay" on:click={togglePopup}></div>
+	<div class="popup">
+		<h2 class="text-2xl">Hello welcome the Serca!</h2>
+		<p>
+			We do use some cookies. We haven't added them to your browser yet. You'll see this popup each
+			time. Oh and we do use cookies for some features.
+		</p>
+		<button class="m-4 border border-gray-300 p-4" on:click={togglePopup}>Close</button>
+		<button
+			class="m-4 border border-gray-300 p-4"
+			on:click={() => {
+				setCookie('visited', 'true', 365);
+				togglePopup();
+			}}>Accept</button
+		>
+	</div>
+{/if}
+
 <!-- Footer -->
 <Vudoo />
 
@@ -154,5 +231,52 @@
 	/* Subtle highlight effect */
 	ul li:hover {
 		background-color: #f0f0f0;
+	}
+
+	/* Overlay to dim the background */
+	.overlay {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background: rgba(0, 0, 0, 0.5);
+		z-index: 10;
+	}
+
+	/* The popup container */
+	.popup {
+		position: fixed;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		background: white;
+		padding: 20px;
+		border-radius: 8px;
+		box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+		z-index: 20;
+	}
+
+	.overlay {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background: rgba(0, 0, 0, 0.5);
+		z-index: 10;
+	}
+
+	/* The popup container */
+	.popup {
+		position: fixed;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		background: white;
+		padding: 20px;
+		border-radius: 8px;
+		box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+		z-index: 20;
 	}
 </style>

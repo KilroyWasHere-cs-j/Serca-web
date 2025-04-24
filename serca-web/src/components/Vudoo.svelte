@@ -11,7 +11,7 @@
 
 	<div class="content-block">
 		<p class="retro-font">Welcome to the future, where technology and simplicity meet.</p>
-		<a href="https://www.vudoogroup.dev/" class="simple-button">Click Me!</a>
+		<a href="https://www.serca.dev/" class="simple-button">Click Me!</a>
 	</div>
 </div>
 

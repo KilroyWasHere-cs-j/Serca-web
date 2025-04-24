@@ -76,7 +76,7 @@
 <!-- Fullscreen Centered Page -->
 <div class="flex min-h-screen flex-col items-center justify-center bg-gray-200">
 	<!-- Info box -->
-	<div class="m-8 border border-gray-800 bg-yellow-100 p-8">
+	<div class="m-8 w-[600px] border border-gray-800 bg-yellow-100 p-8">
 		<h1 class="retro-font mb-6 text-4xl text-gray-600">Important Notice</h1>
 		<p>
 			This service is still in development. Please be patient. Search at your own risk, not all
