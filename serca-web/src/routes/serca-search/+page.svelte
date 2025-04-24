@@ -29,7 +29,10 @@
 			query = '';
 			return;
 		}
-		let groq = await sendPrompt(query, 'Extract keywords');
+		let groq = await sendPrompt(
+			query,
+			'Extract keywords, just a list of words, no formatting, no other text, seperate the words with a space'
+		);
 		console.log('Groq' + groq);
 		database = await searchFromServer(query);
 	}
