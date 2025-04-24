@@ -30,7 +30,7 @@
 			return;
 		}
 		let groq = await sendPrompt(query, 'Extract keywords');
-		console.log(groq);
+		console.log('Groq' + groq);
 		database = await searchFromServer(query);
 	}
 
@@ -110,15 +110,6 @@
 				</h1>
 				<p class="m-2 text-gray-600">
 					{row.description}
-				</p>
-				<p class="m-2 rounded bg-orange-500 p-2">
-					{row.mature}
-				</p>
-				<p class="m-2 rounded bg-yellow-500 p-2">
-					{row.child}
-				</p>
-				<p class="m-2 rounded bg-purple-500 p-2">
-					{row.flag}
 				</p>
 			</div>
 		{/each}

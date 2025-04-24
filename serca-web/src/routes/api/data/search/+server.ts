@@ -21,7 +21,7 @@ export async function POST({ request }) {
 			i === 0 ? cond : sql`${acc} OR ${cond}`
 		);
 
-		const rows = await sql`SELECT * FROM urls WHERE ${whereClause}`;
+		const rows = await sql`SELECT * FROM urls WHERE ${whereClause} AND mature=false`;
 
 		return json({ results: rows || [], error: null });
 	} catch (err: any) {
