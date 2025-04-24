@@ -1,5 +1,6 @@
 <script>
 	import Navbar from '../../components/Navbar.svelte';
+	import * as CryptoJS from 'crypto-js';
 
 	let username = '';
 	let email = '';
@@ -7,6 +8,7 @@
 
 	async function handleSubmit() {
 		console.log('Pushing data to backend');
+		key = encryptKey(key);
 		const res = await fetch('/api/data/submit', {
 			method: 'POST',
 			headers: {
@@ -22,6 +24,10 @@
 		} else {
 			console.error('Signup failed:', data.message);
 		}
+	}
+
+	function encryptKey(key) {
+		return CryptoJS.SHA256(key);
 	}
 </script>
 
