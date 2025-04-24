@@ -27,7 +27,8 @@
 	}
 
 	function encryptKey(key) {
-		return CryptoJS.SHA256(key);
+		let hash = CryptoJS.SHA256(key);
+		return hash.toString();
 	}
 </script>
 

@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import 'dotenv/config';
 import { neon } from '@neondatabase/serverless';
+import * as CryptoJS from 'crypto-js';
 
 const connectionString = process.env.DATABASE_URL as string;
 const sql = neon(connectionString);
