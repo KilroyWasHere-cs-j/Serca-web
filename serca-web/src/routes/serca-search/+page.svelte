@@ -35,9 +35,10 @@
 		);
 		const match = groq.match(/<\/think>(.*)/s);
 
-		const afterThink = match ? match[1].trim() : '';
+		let afterThink = match ? match[1].trim() : '';
 		console.log('Groq' + afterThink);
-		database = await searchFromServer(query);
+		afterThink = afterThink.split(' ');
+		database = await searchFromServer(afterThink);
 	}
 
 	async function sendPrompt(query: string, prompt: string) {
