@@ -38,7 +38,7 @@
 		let afterThink = match ? match[1].trim() : '';
 		console.log('Groq' + afterThink);
 		afterThink = afterThink.split(' ');
-		database = await searchFromServer(afterThink);
+		database = await searchFromServer(afterThink.join(' '));
 	}
 
 	async function sendPrompt(query: string, prompt: string) {
