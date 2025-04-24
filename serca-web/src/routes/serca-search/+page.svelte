@@ -55,7 +55,7 @@
 		return data.response;
 	}
 
-	async function searchFromServer(query: string) {
+	async function searchFromServer(query) {
 		console.log('Searching for:', query);
 		const res = await fetch('/api/data/search', {
 			method: 'POST',
