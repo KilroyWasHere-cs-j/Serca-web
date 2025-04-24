@@ -6,6 +6,8 @@
 
 	let response = '';
 	let database = { results: [] };
+	let keywords = [];
+	let words = [];
 
 	let query = '';
 
@@ -27,12 +29,13 @@
 			query = '';
 			return;
 		}
+		let groq = await sendPrompt(query, 'Extract keywords');
+		console.log(groq);
 		database = await searchFromServer(query);
 	}
 
-	async function sendPrompt(query: string) {
-		let prompt = '';
-		prompt += ' ' + query;
+	async function sendPrompt(query: string, prompt: string) {
+		prompt += ':' + query;
 		const res = await fetch('/api/groq-chat', {
 			method: 'POST',
 			headers: {
@@ -72,7 +75,7 @@
 			This service is still in development. Please be patient. Search at your own risk, not all
 			searches are guaranteed to be accurate, or complete. Searches my result in NSFW content. We
 			will not be held responsible for any content that may be found. We understand the descriptions
-			are lacking and/or a complete lie. We are working on improving the prompts for the AI model.
+			are lacking and/or are incorrect. We are working on improving the prompts for the AI model.
 		</p>
 	</div>
 
