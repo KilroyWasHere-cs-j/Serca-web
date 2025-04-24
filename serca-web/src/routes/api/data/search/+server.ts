@@ -14,7 +14,11 @@ export async function POST({ request }) {
 			return new Response('Invalid or missing query', { status: 400 });
 		}
 
-		const keywords = rawQuery.toLowerCase().split(/\s+/).filter(Boolean);
+		const keywords = Array.isArray(body.query)
+			? body.query.map((q) => q.toLowerCase().trim()).filter(Boolean)
+			: typeof body.query === 'string'
+				? body.query.toLowerCase().split(/\s+/).filter(Boolean)
+				: [];
 
 		const conditions = keywords.map((kw) => sql`description ILIKE ${`%${kw}%`}`);
 		const whereClause = conditions.reduce((acc, cond, i) =>
