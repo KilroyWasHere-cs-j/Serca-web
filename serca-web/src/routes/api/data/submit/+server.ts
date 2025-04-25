@@ -28,11 +28,11 @@ export async function POST({ request }) {
   ON CONFLICT (email, key) DO NOTHING
   RETURNING *;
 `;
-
+		console.log(result);
 		if (result.rowCount === 0) {
 			return json({ error: 'User with this email or key already exists.' }, { status: 409 });
 		}
-		return json({ success: true });
+		return json({ success: true }, { status: 200 });
 	} catch (err: any) {
 		console.error('DB Error:', err?.message || err);
 		return json({ error: 'Internal Server Error' }, { status: 500 });
