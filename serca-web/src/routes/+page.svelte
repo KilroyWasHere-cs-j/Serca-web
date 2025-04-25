@@ -5,6 +5,9 @@
 	import Newsletter from '../components/Newsletter.svelte';
 	import Vudoo from '../components/Vudoo.svelte';
 	import { injectAnalytics } from '@vercel/analytics/sveltekit';
+	import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
+
+	injectSpeedInsights();
 
 	let showPopup = false;
 
