@@ -2,11 +2,17 @@
 	import Navbar from '../../components/Navbar.svelte';
 	import * as CryptoJS from 'crypto-js';
 
-	let username = '';
+	let username = 'WEB';
 	let email = '';
 	let key = '';
+	let success = false;
+	let showSuccess = false;
 
 	async function handleSubmit() {
+		let result = await createUser();
+	}
+
+	async function createUser() {
 		console.log('Pushing data to backend');
 		let ekey = encryptKey(key);
 		console.log(ekey);
@@ -22,8 +28,12 @@
 
 		if (res.ok) {
 			console.log('Signup successful:', data);
+			success = true;
+			showSuccess = true;
 		} else {
 			console.error('Signup failed:', data.message);
+			success = false;
+			showSuccess = true;
 		}
 	}
 
@@ -36,27 +46,31 @@
 <Navbar />
 
 <div class="notice">
-	<h1>
-		Presently we aren't a paid platform — but soon we will be. We do record this info so we can
-		reach out when we are.
-	</h1>
+	<h1>Inorder to use our services, you must sign up.</h1>
 </div>
+
+{#if success && showSuccess}
+	<div class="text-red m-4 flex w-full flex-col justify-center p-4">
+		<h1 class="flex justify-center text-4xl text-green-600">Signup Successful!!</h1>
+	</div>
+{/if}
+
+{#if !success && showSuccess}
+	<div class="text-red m-4 flex w-full flex-col justify-center p-4">
+		<h1 class="flex justify-center text-4xl text-red-600">Signup Failed!!</h1>
+	</div>
+{/if}
 
 <div class="page-wrapper">
 	<form on:submit|preventDefault={handleSubmit} class="signup-form">
 		<h2>Signup</h2>
 
-		<label>Username:</label>
-		<input type="text" placeholder="Username" bind:value={username} required />
-
-		<p class="note">Emails and Keys are unique. Usernames are mostly for fun.</p>
-
-		<label>Email:</label>
+		<h1>Email:</h1>
 		<input type="email" placeholder="Email" bind:value={email} required />
 
-		<p class="note">Don't use GuerrillaMail. We use your email for contact & verification.</p>
+		<p class="note">Don't use a temp email. We use your email for contact & verification.</p>
 
-		<label>Password Key:</label>
+		<h1>Password Key:</h1>
 		<input type="password" placeholder="Key" bind:value={key} required />
 		<p class="note">This acts like a password. Used to verify your session later.</p>
 

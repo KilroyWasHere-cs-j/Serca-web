@@ -32,10 +32,7 @@ export async function POST({ request }) {
 		if (result.rowCount === 0) {
 			return json({ error: 'User with this email or key already exists.' }, { status: 409 });
 		}
-
-		return json({ user: result.rows[0] });
-		console.log(result.rows[0]);
-		console.log('Sent to db');
+		return json({ success: true });
 	} catch (err: any) {
 		console.error('DB Error:', err?.message || err);
 		return json({ error: 'Internal Server Error' }, { status: 500 });
