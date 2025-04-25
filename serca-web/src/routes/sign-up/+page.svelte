@@ -9,13 +9,15 @@
 	let showSuccess = false;
 
 	async function handleSubmit() {
+		console.log('📨 Submitting form data...');
 		let result = await createUser();
 	}
 
 	async function createUser() {
-		console.log('Pushing data to backend');
+		console.log('🔐 Encrypting key...');
 		let ekey = encryptKey(key);
-		console.log(ekey);
+		console.log('ekey:', ekey);
+
 		const res = await fetch('/api/data/submit', {
 			method: 'POST',
 			headers: {
@@ -27,11 +29,11 @@
 		const data = await res.json();
 
 		if (res.ok) {
-			console.log('Signup successful:', data);
+			console.log('✅ Signup successful');
 			success = true;
 			showSuccess = true;
 		} else {
-			console.error('Signup failed:', data.message);
+			console.error('❌ Signup failed:', data.message);
 			success = false;
 			showSuccess = true;
 		}
@@ -46,18 +48,18 @@
 <Navbar />
 
 <div class="notice">
-	<h1>Inorder to use our services, you must sign up.</h1>
+	<h1>📋 To use the service, please sign up below.</h1>
 </div>
 
 {#if success && showSuccess}
-	<div class="text-red m-4 flex w-full flex-col justify-center p-4">
-		<h1 class="flex justify-center text-4xl text-green-600">Signup Successful!!</h1>
+	<div class="banner success">
+		<h1>✅ Signup Successful!!</h1>
 	</div>
 {/if}
 
 {#if !success && showSuccess}
-	<div class="text-red m-4 flex w-full flex-col justify-center p-4">
-		<h1 class="flex justify-center text-4xl text-red-600">Signup Failed!!</h1>
+	<div class="banner fail">
+		<h1>⚠️ Signup Failed. Please try again.</h1>
 	</div>
 {/if}
 
@@ -65,100 +67,120 @@
 	<form on:submit|preventDefault={handleSubmit} class="signup-form">
 		<h2>Signup</h2>
 
-		<h1>Email:</h1>
-		<input type="email" placeholder="Email" bind:value={email} required />
+		<label for="email">📧 Email:</label>
+		<input type="email" id="email" bind:value={email} required />
 
-		<p class="note">Don't use a temp email. We use your email for contact & verification.</p>
+		<p class="note">No temp emails please. We use this to contact you.</p>
 
-		<h1>Password Key:</h1>
-		<input type="password" placeholder="Key" bind:value={key} required />
-		<p class="note">This acts like a password. Used to verify your session later.</p>
+		<label for="key">🔑 Password Key:</label>
+		<input type="password" id="key" bind:value={key} required />
 
-		<button type="submit">Sign Up</button>
+		<p class="note">This is like your password. Keep it safe.</p>
+
+		<button type="submit">Submit 📨</button>
 	</form>
 </div>
 
 <style>
 	body {
-		background-color: #eee;
-		color: #000;
-		font-family: Verdana, Arial, sans-serif;
+		background-color: #f2f2f2;
+		color: #222;
+		font-family: 'Helvetica', 'Arial', sans-serif;
 		margin: 0;
 	}
 
 	.notice {
 		margin: 2rem auto;
-		max-width: 1000px;
-		background-color: #fff8c4;
+		max-width: 800px;
+		background-color: #fefefe;
+		border: 1px solid #ccc;
 		padding: 20px;
-		border: 2px solid #ccc;
 		text-align: center;
-		font-size: 20px;
-		box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.1);
+		font-size: 18px;
 	}
 
 	.page-wrapper {
 		display: flex;
 		justify-content: center;
-		padding: 80px 20px;
+		padding: 60px 20px;
+		background-color: #e6e6e6;
 		min-height: 100vh;
-		background-color: #dcdcdc;
-		overflow-y: auto;
 	}
 
 	.signup-form {
-		width: 440px;
-		padding: 40px;
+		width: 400px;
+		padding: 30px;
 		background-color: #ffffff;
-		border: 4px solid #000;
-		box-shadow: 6px 6px 0px #bbb;
+		border: 2px solid #999;
+		box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.1);
 	}
 
 	h2 {
 		text-align: center;
-		font-size: 32px;
-		text-transform: uppercase;
-		margin-bottom: 32px;
-		border-bottom: 2px solid #000;
+		font-size: 24px;
+		margin-bottom: 20px;
+		border-bottom: 1px solid #ccc;
 		padding-bottom: 10px;
 	}
 
 	label {
 		display: block;
-		margin: 20px 0 8px;
+		margin-top: 20px;
 		font-weight: bold;
-		font-size: 20px;
+		font-size: 16px;
 	}
 
 	input {
 		width: 100%;
-		padding: 12px;
-		border: 2px solid #000;
-		font-size: 18px;
-		background-color: #fff;
-		color: #000;
+		padding: 10px;
+		border: 1px solid #aaa;
+		font-size: 16px;
+		background-color: #fafafa;
+		margin-top: 5px;
 	}
 
 	.note {
-		font-size: 16px;
-		color: #444;
+		font-size: 14px;
+		color: #555;
 		margin-top: 6px;
 	}
 
 	button {
 		width: 100%;
-		padding: 14px;
-		background-color: #000;
+		padding: 12px;
+		background-color: #444;
 		color: #fff;
-		border: 2px solid #000;
-		font-size: 20px;
+		border: none;
+		font-size: 16px;
+		margin-top: 25px;
 		font-weight: bold;
-		margin-top: 30px;
-		text-transform: uppercase;
 	}
 
 	button:hover {
-		background-color: #333;
+		background-color: #000;
 		cursor: pointer;
+	}
+
+	.banner {
+		margin: 20px auto;
+		padding: 16px;
+		text-align: center;
+		font-size: 18px;
+		font-weight: bold;
+		width: 90%;
+		max-width: 600px;
+		border: 1px solid;
+	}
+
+	.success {
+		background-color: #e0ffe0;
+		color: #006400;
+		border-color: #006400;
+	}
+
+	.fail {
+		background-color: #ffe0e0;
+		color: #8b0000;
+		border-color: #8b0000;
 	}
 </style>

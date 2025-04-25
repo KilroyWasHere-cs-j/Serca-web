@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Stream } from 'groq-sdk/lib/streaming.mjs';
 	import Navbar from '../../components/Navbar.svelte';
+	import * as CryptoJS from 'crypto-js';
 
 	// Groq
 
@@ -9,11 +10,42 @@
 	let keywords = [];
 	let words = [];
 
+	let showSearch = false;
+	let showInvalid = false;
+
 	let query = '';
 
 	const regex = /^[A-Za-z0-9\s.,!?'"():;\-\/&]+$/;
 	const sqlRegex = /\b(SELECT|INSERT|UPDATE|DELETE|DROP|ALTER|CREATE|EXEC|UNION|WHERE|FROM)\b/i;
 	const htmlTagRegex = /<[^>]*>/g;
+
+	let email = '';
+	let key = '';
+
+	function encryptKey(key) {
+		let hash = CryptoJS.SHA256(key);
+		return hash.toString();
+	}
+
+	async function handleSubmit() {
+		let ekey = encryptKey(key);
+		console.log('Hunting for user:', email, 'with key:', ekey);
+		const res = await fetch('/api/data/signin', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ email, ekey })
+		});
+
+		const data_r = await res.json();
+		console.log(data_r);
+		if (data_r.validuser) {
+			showSearch = true;
+		} else {
+			showInvalid = true;
+		}
+	}
 
 	async function handleSearch() {
 		console.log('Search triggered');
@@ -73,54 +105,87 @@
 
 <Navbar />
 
-<!-- Fullscreen Centered Page -->
-<div class="flex min-h-screen flex-col items-center justify-center bg-gray-200">
-	<!-- Info box -->
-	<div class="info-box m-8 w-full border border-gray-800 bg-yellow-100 p-8 sm:w-[600px]">
-		<h1 class="retro-font mb-6 text-4xl text-gray-600">Important Notice</h1>
-		<p>
-			This service is still in development. Please be patient. Search at your own risk, not all
-			searches are guaranteed to be accurate, or complete. Searches may result in NSFW content. We
-			will not be held responsible for any content that may be found. We understand the descriptions
-			are lacking and/or are incorrect. We are working on improving the prompts for the AI model.
-		</p>
-	</div>
+<div class="flex h-full w-screen flex-col items-center">
+	{#if showInvalid}
+		<div class="m-8 flex flex-col items-center justify-center border border-gray-600 bg-red-500">
+			<h1 class="m-4 text-2xl text-white">Sorry we couldn't find any results for your search.</h1>
+			<p>If this issue presists please file a report.</p>
+		</div>
+	{/if}
 
-	<!-- Centered Search Box -->
-	<div class="search-box w-full max-w-xl border border-gray-600 bg-white p-8 text-center">
-		<h1 class="retro-font mb-6 text-4xl text-gray-800">Serca Search</h1>
+	{#if !showSearch}
+		<div class="flex justify-center">
+			<div class="page-wrapper">
+				<form on:submit|preventDefault={handleSubmit} class="signup-form">
+					<h2 class="mt-4 mb-4 text-2xl">Sign In</h2>
 
-		<input
-			bind:value={query}
-			type="text"
-			placeholder="Describe your media here..."
-			class="retro-font w-full rounded-lg border-2 border-gray-400 bg-gray-100 p-4 text-lg text-gray-800 focus:ring-2 focus:ring-gray-600 focus:outline-none"
-		/>
+					<h1>Email:</h1>
+					<input type="email" placeholder="Email" bind:value={email} required />
 
-		<button
-			on:click={handleSearch}
-			class="retro-font text-red mt-6 border-2 border-blue-600 bg-blue-300 px-6 py-3 font-bold hover:bg-blue-400"
-		>
-			Search
-		</button>
+					<p class="note">This is the email you signed up with.</p>
 
-		<p class="retro-font mt-6 text-gray-600 italic">"We find what the internet forgot"</p>
-	</div>
+					<h1>Password Key:</h1>
+					<input type="password" placeholder="Key" bind:value={key} required />
+					<p class="note">This is that unique identifier for your account.</p>
 
-	<div class="results-box m-8 border border-gray-600 bg-white p-8">
-		<h1 class="retro-font text-gray-600 italic">We found...</h1>
-		<!-- <p>{database.results}</p> -->
-		{#each database.results as row}
-			<div class="m-4 border border-gray-600 bg-white p-4">
-				<h1 class="text-blue-500">
-					<a href={row.url} target="_blank" rel="noopener noreferrer">{row.url}</a>
-				</h1>
-				<p class="m-2 text-gray-600">
-					{row.description}
+					<button class="mt-4 p-2" type="submit">Sign In</button>
+				</form>
+			</div>
+		</div>
+	{/if}
+
+	{#if showSearch}
+		<!-- Fullscreen Centered Page -->
+		<div class="flex min-h-screen flex-col items-center justify-center bg-gray-200">
+			<!-- Info box -->
+			<div class="info-box m-8 w-full border border-gray-800 bg-yellow-100 p-8 sm:w-[600px]">
+				<h1 class="retro-font mb-6 text-4xl text-gray-600">Important Notice</h1>
+				<p>
+					This service is still in development. Please be patient. Search at your own risk, not all
+					searches are guaranteed to be accurate, or complete. Searches may result in NSFW content.
+					We will not be held responsible for any content that may be found. We understand the
+					descriptions are lacking and/or are incorrect. We are working on improving the prompts for
+					the AI model.
 				</p>
 			</div>
-		{/each}
-	</div>
+
+			<!-- Centered Search Box -->
+			<div class="search-box w-full max-w-xl border border-gray-600 bg-white p-8 text-center">
+				<h1 class="retro-font mb-6 text-4xl text-gray-800">Serca Search</h1>
+
+				<input
+					bind:value={query}
+					type="text"
+					placeholder="Describe your media here..."
+					class="retro-font w-full rounded-lg border-2 border-gray-400 bg-gray-100 p-4 text-lg text-gray-800 focus:ring-2 focus:ring-gray-600 focus:outline-none"
+				/>
+
+				<button
+					on:click={handleSearch}
+					class="retro-font text-red mt-6 border-2 border-blue-600 bg-blue-300 px-6 py-3 font-bold hover:bg-blue-400"
+				>
+					Search
+				</button>
+
+				<p class="retro-font mt-6 text-gray-600 italic">"We find what the internet forgot"</p>
+			</div>
+
+			<div class="results-box m-8 border border-gray-600 bg-white p-8">
+				<h1 class="retro-font text-gray-600 italic">We found...</h1>
+				<!-- <p>{database.results}</p> -->
+				{#each database.results as row}
+					<div class="m-4 border border-gray-600 bg-white p-4">
+						<h1 class="text-blue-500">
+							<a href={row.url} target="_blank" rel="noopener noreferrer">{row.url}</a>
+						</h1>
+						<p class="m-2 text-gray-600">
+							{row.description}
+						</p>
+					</div>
+				{/each}
+			</div>
+		</div>
+	{/if}
 </div>
 
 <style>

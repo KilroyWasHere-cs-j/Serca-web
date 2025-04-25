@@ -61,6 +61,9 @@
 			<label for="issueCategory">Issue Category:</label>
 			<select id="issueCategory" bind:value={issueCategory}>
 				<option value="General">General</option>
+				<option value="Technical/Bug">Technical/Bug</option>
+				<option value="Account">Account</option>
+				<option value="Vunerability">Vunerability</option>
 				<option value="Poor/Wrong Label">Poor/Wrong Label</option>
 				<option value="Adult/Mature">Adult/Mature</option>
 				<option value="Gore/Death">Gore/Death</option>

@@ -1,4 +1,4 @@
-<script>
+<!-- <script>
 	import { onMount } from 'svelte';
 	export let data;
 
@@ -23,4 +23,4 @@
 
 <textarea bind:value={prompt} placeholder="Ask something..."></textarea>
 <button on:click={sendPrompt}>Send</button>
-<pre>{response}</pre>
+<pre>{response}</pre> -->
