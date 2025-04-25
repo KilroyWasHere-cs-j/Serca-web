@@ -8,12 +8,14 @@
 
 	async function handleSubmit() {
 		console.log('Pushing data to backend');
+		let ekey = encryptKey(key);
+		console.log(ekey);
 		const res = await fetch('/api/data/submit', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({ username, email, key })
+			body: JSON.stringify({ username, email, ekey })
 		});
 
 		const data = await res.json();
