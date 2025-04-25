@@ -87,15 +87,16 @@
 	<section id="how-does-serca" class="mb-12">
 		<h2 class="mb-2 text-2xl font-bold text-purple-800 underline">How does this service work?</h2>
 		<p>
-			We are trying our best as transparent as possible. We will maintain a free versi on open for
-			the betterment of the internet, in addition Serca will provide a paid version with additional
-			features and support. This paided service will be tiered, and will allow for enchanced
-			services and searching. The internet is a amazing place and we all love it, but it's not all
-			sunshine and rainbows. Serca will work to implement a flagging system to mark inappropriate
-			content. Such content will not be accessable at the free tier. Paided tiers will be able to
-			view this content. In addition ALL illegal content will be banned and will be reported to the
-			proper authorities. If you have any questions or concerns, please
-			<a href="mailto:gmtower1@gmail.com">contact</a> us.
+			We are committed to being as transparent as possible. We will maintain a free version to
+			contribute to the betterment of the internet. Additionally, Serca will offer a paid version
+			with extra features and support. This paid service will be tiered, providing enhanced services
+			and search capabilities. While the internet is an amazing place, and we all love it!! It's not
+			all sunshine and rainbows. Serca will implement a flagging system to mark inappropriate
+			content, which will be inaccessible at the free tier. Paid tiers will have access to this
+			content. Furthermore, all illegal content will be banned and reported to the proper
+			authorities. If you have any questions or concerns, please feel free to <a
+				href="mailto:gmtower1@gmail.com">contact</a
+			> us.
 		</p>
 	</section>
 
@@ -104,8 +105,8 @@
 		<h2 class="mb-2 text-2xl font-bold text-purple-800 underline">How It Works</h2>
 		<ul class="list-inside list-disc text-gray-800">
 			<li>
-				<strong>Multimodal AI models</strong> (image, video, and audio) to analyze and process various
-				types of media.
+				<strong>Multimodal AI models</strong> (image, video, and audio[coming soon]) to analyze and process
+				various types of media.
 			</li>
 			<li>
 				<strong>Advanced web scraping and discovery</strong> techniques to uncover hidden media across
@@ -124,7 +125,7 @@
 		<h3>Here are some sample queries to try. Please see search page for specifics.</h3>
 		<div class="border border-gray-300 bg-white p-4 font-mono text-sm text-gray-800 shadow-inner">
 			<pre>
-> "people dancing"
+> "people at the beach"
 > "tv and broadcasts"
 > "animals"
       </pre>
