@@ -5,6 +5,7 @@
 
 	// Groq
 
+	// Mostly useless variables, but if I renamed the system might implode
 	let response = '';
 	let database = { results: [] };
 	let keywords = [];
@@ -15,6 +16,7 @@
 
 	let query = '';
 
+	// Regex for preventing SQL injection, XSS attacks, and HTML injection
 	const regex = /^[A-Za-z0-9\s.,!?'"():;\-\/&]+$/;
 	const sqlRegex = /\b(SELECT|INSERT|UPDATE|DELETE|DROP|ALTER|CREATE|EXEC|UNION|WHERE|FROM)\b/i;
 	const htmlTagRegex = /<[^>]*>/g;
@@ -22,11 +24,13 @@
 	let email = '';
 	let key = '';
 
+	// Shaw 256 hash :)
 	function encryptKey(key) {
 		let hash = CryptoJS.SHA256(key);
 		return hash.toString();
 	}
 
+	// Query user db and either auth or fail of user
 	async function handleSubmit() {
 		let ekey = encryptKey(key);
 		console.log('Hunting for user:', email, 'with key:', ekey);
@@ -47,6 +51,7 @@
 		}
 	}
 
+	// Query the database for the searched terms
 	async function handleSearch() {
 		console.log('Search triggered');
 		if (!regex.test(query)) {
@@ -61,18 +66,21 @@
 			query = '';
 			return;
 		}
+		// Lil bit of prompt engineering who the fuck knows if this shit will actually do what I want it to do
 		let groq = await sendPrompt(
 			query,
 			'Extract keywords, just a list of words, no formatting, no other text, seperate the words with a space, [video, gif, image, etc...] are not keywords'
 		);
 		const match = groq.match(/<\/think>(.*)/s);
 
+		// Fix the messy response Groq gives us
 		let afterThink = match ? match[1].trim() : '';
 		console.log('Groq' + afterThink);
 		afterThink = afterThink.split(' ');
 		database = await searchFromServer(afterThink.join(' '));
 	}
 
+	// Sends prompt to Groq API
 	async function sendPrompt(query: string, prompt: string) {
 		prompt += ':' + query;
 		const res = await fetch('/api/groq-chat', {
@@ -87,6 +95,7 @@
 		return data.response;
 	}
 
+	//Sends query to db API
 	async function searchFromServer(query) {
 		console.log('Searching for:', query);
 		const res = await fetch('/api/data/search', {
@@ -140,17 +149,18 @@
 			<!-- Info box -->
 			<div class="info-box m-8 w-full border border-gray-800 bg-yellow-100 p-8 sm:w-[600px]">
 				<h1 class="retro-font mb-6 text-4xl text-gray-600">Important Notice</h1>
-				<p>
+				<!-- <p>
 					This service is still in development. Please be patient. Search at your own risk, not all
 					searches are guaranteed to be accurate, or complete. Searches may result in NSFW content.
 					We will not be held responsible for any content that may be found. We understand the
 					descriptions are lacking and/or are incorrect. We are working on improving the prompts for
 					the AI model.
-				</p>
+				</p> -->
+				<p>He this service is down for maintenance. Please check back later.</p>
 			</div>
 
 			<!-- Centered Search Box -->
-			<div class="search-box w-full max-w-xl border border-gray-600 bg-white p-8 text-center">
+			<!-- <div class="search-box w-full max-w-xl border border-gray-600 bg-white p-8 text-center">
 				<h1 class="retro-font mb-6 text-4xl text-gray-800">Serca Search</h1>
 
 				<input
@@ -168,7 +178,7 @@
 				</button>
 
 				<p class="retro-font mt-6 text-gray-600 italic">"We find what the internet forgot"</p>
-			</div>
+			</div> -->
 
 			<div class="results-box m-8 border border-gray-600 bg-white p-8">
 				<h1 class="retro-font text-gray-600 italic">We found...</h1>
