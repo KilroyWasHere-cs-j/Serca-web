@@ -167,7 +167,7 @@
 				<input
 					bind:value={query}
 					type="text"
-					placeholder="Describe your media here..."
+					placeholder="Place search terms here..."
 					class="retro-font w-full rounded-lg border-2 border-gray-400 bg-gray-100 p-4 text-lg text-gray-800 focus:ring-2 focus:ring-gray-600 focus:outline-none"
 				/>
 
