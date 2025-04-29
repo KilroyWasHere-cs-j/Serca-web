@@ -149,18 +149,19 @@
 			<!-- Info box -->
 			<div class="info-box m-8 w-full border border-gray-800 bg-yellow-100 p-8 sm:w-[600px]">
 				<h1 class="retro-font mb-6 text-4xl text-gray-600">Important Notice</h1>
-				<!-- <p>
+				<p>
 					This service is still in development. Please be patient. Search at your own risk, not all
 					searches are guaranteed to be accurate, or complete. Searches may result in NSFW content.
 					We will not be held responsible for any content that may be found. We understand the
 					descriptions are lacking and/or are incorrect. We are working on improving the prompts for
-					the AI model.
-				</p> -->
-				<p>He this service is down for maintenance. Please check back later.</p>
+					the AI model. Lastly we will be mostly likely adding a LlamaIndex based search
+					chatbot/field to better searching.
+				</p>
+				<!-- <p>He this service is down for maintenance. Please check back later.</p> -->
 			</div>
 
 			<!-- Centered Search Box -->
-			<!-- <div class="search-box w-full max-w-xl border border-gray-600 bg-white p-8 text-center">
+			<div class="search-box w-full max-w-xl border border-gray-600 bg-white p-8 text-center">
 				<h1 class="retro-font mb-6 text-4xl text-gray-800">Serca Search</h1>
 
 				<input
@@ -178,7 +179,7 @@
 				</button>
 
 				<p class="retro-font mt-6 text-gray-600 italic">"We find what the internet forgot"</p>
-			</div> -->
+			</div>
 
 			<div class="results-box m-8 border border-gray-600 bg-white p-8">
 				<h1 class="retro-font text-gray-600 italic">We found...</h1>
