@@ -154,8 +154,8 @@
 					searches are guaranteed to be accurate, or complete. Searches may result in NSFW content.
 					We will not be held responsible for any content that may be found. We understand the
 					descriptions are lacking and/or are incorrect. We are working on improving the prompts for
-					the AI model. Lastly we will be mostly likely adding a LlamaIndex based search
-					chatbot/field to better searching.
+					the AI model. Lastly we will be mostly likely adding an AI based search chatbot/field to
+					better searching.
 				</p>
 				<!-- <p>He this service is down for maintenance. Please check back later.</p> -->
 			</div>
