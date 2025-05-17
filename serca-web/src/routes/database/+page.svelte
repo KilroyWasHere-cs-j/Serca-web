@@ -37,7 +37,7 @@
 	<section id="architecture" class="mb-10">
 		<h2 class="mb-2 text-xl text-purple-800">🛠️ Architecture Overview</h2>
 		<p class="leading-relaxed text-gray-700">
-			Serca's database is a centralized cloud-hosted PostgreSQL DB with a Sqlx-powered Rust API.
+			Serca's database is a serverless Neon postgreSQL database.
 		</p>
 
 		<h3 class="mt-8 text-lg font-bold">Data Table Peek</h3>

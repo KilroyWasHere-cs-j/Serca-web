@@ -20,9 +20,9 @@
 	}
 
 	async function sendPrompt(userprompt, db) {
-		const prompt = `You are a helpful assistant designed to assist users in finding information from a database. Your job is to find the best match for the user's query. User asks: ${userprompt} Database says: ${db}`;
+		const prompt = `You are Serca an AI media search engine.`;
 
-		const res = await fetch('/api/groq-chat', {
+		const res = await fetch('/api/data/aisearch', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
@@ -71,8 +71,6 @@
 </div>
 
 <div class="flex w-screen flex-col items-center justify-center">
-	<p>{past_queries}</p>
-
 	<input
 		bind:value={query}
 		type="text"

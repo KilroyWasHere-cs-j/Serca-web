@@ -160,6 +160,14 @@
 <!-- Announcements -->
 <div class="mx-auto mt-6 max-w-5xl px-4">
 	<Announcements
+		title="Back end and AI updates"
+		date="May 17, 2025"
+		type="Development Milestone"
+		content="It has been a bit since we added anything to announcements. We've been putting a ton of work into building out the backend.
+		The entire AI pipeline and inference has been moved off of the cloud and can now run on a M1 Mac.
+		It's important that we can run Serca on hardware that doesn't cost $10,000. Next is building out the API and search engine."
+	/>
+	<Announcements
 		title="Serca launches into alpha"
 		date="April 23, 2025"
 		type="Development Milestone"
