@@ -70,7 +70,7 @@
 			<li><a href="#how-does-serca" class="hover:underline">How does this service work?</a></li>
 			<li><a href="#how-it-works" class="hover:underline">Under the hood</a></li>
 			<li><a href="#sample-queries" class="hover:underline">Sample Queries</a></li>
-			<li><a href="#api" class="hover:underline">Serca API</a></li>
+			<li><a href="#api" class="hover:underline">Pricing</a></li>
 			<li><a href="#highlighted-sites" class="hover:underline">Cool Sites</a></li>
 		</ul>
 	</div>
@@ -135,11 +135,21 @@
 		</div>
 	</section>
 
-	<!-- Serca API -->
-	<section id="api" class="mb-12">
-		<h2 class="mb-2 text-2xl font-bold text-purple-800 underline">Serca API</h2>
+	<!-- Serca Pricing -->
+	<section id="pricing" class="mb-12">
+		<h2 class="mb-2 text-2xl font-bold text-purple-800 underline">Serca Pricing</h2>
 		<div class="border border-gray-400 bg-gray-100 p-4 font-mono text-sm">
-			<p>We will host an API. <strong>Not currently open to public.</strong></p>
+			<p>
+				While the Serca-core is open source access to our database and search engine are not
+				completely free. We need to charge small fees to support the servers and database.
+			</p>
+			<h2>Pay as you go pricing</h2>
+			<p>
+				Every new user will have a set number of queries per month free. After these queries are
+				used up, they will be charged pre query.
+			</p>
+			<h2>Always free</h2>
+			<p>The keyword searching method will remain free.</p>
 		</div>
 	</section>
 
