@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import Navbar from '../../components/Navbar.svelte';
 	import * as CryptoJS from 'crypto-js';
 
@@ -9,9 +9,8 @@
 	let groqInternalThoughts = '';
 	let chat_history = '';
 	let query = '';
-	let db_query = 'SELECT url, meta_data, mature, child, flag FROM urls';
 	let searching = false;
-	let database_response = '';
+	let database_response: any = [];
 
 	const data_table_schema = `Table: urls
 - url: string
@@ -25,7 +24,7 @@
 		return hash.toString();
 	}
 
-	async function sendPrompt(userprompt, db) {
+	async function sendPrompt(userprompt) {
 		const prompt = `You are **Serca**, an AI-powered media search assistant.
 
 Your role:
@@ -38,9 +37,14 @@ Your role:
 
 Instructions:
 - Ask follow-up questions if the user's description is vague or incomplete.
-- Do **not** return SQL queries immediately. Instead, gather enough detail through the conversation.
-- Once you are confident you have sufficient information to perform a meaningful search, respond with **SET**, followed only by a SQL WHERE clause that filters the database to match the user's intent.
-- Output **only** the WHERE clause, nothing else.
+- Do **not** execute query immediately. Instead, gather enough detail through the conversation.
+- Always be verbose and comprehensive with the keywords you generate.
+- Once you are confident you have sufficient information to perform a meaningful search, respond with **SET** followed by a structure like:
+json {
+  "keywords": ["keyword1", "keyword2", ...],
+  "mature": false,
+  "child": true
+}
 
 Database schema:
 ${data_table_schema}
@@ -58,54 +62,83 @@ ${userprompt}`;
 		});
 
 		const data = await res.json();
-		chat_history += `User said: ${userprompt}\nYou said: ${data.response}\n`;
+		let response = data.response;
 
-		let resp = data.response;
+		chat_history += `User said: ${userprompt}\nYou said: ${response}\n`;
 
-		if (resp.includes('**SET**') || resp.includes('SET')) {
-			resp = resp
-				.replace(/\*\*SET\*\*/g, '')
-				.replace(/SET/g, '')
-				.trim();
-			db_query += ' ' + resp;
-			console.log('Executing Query:', db_query);
-			return '';
+		if (response.includes('SET')) {
+			console.log('SET passed');
+
+			// Keep only the JSON block up to and including the first closing curly brace
+			const trimmed = response.replace(/}(?=[^}]*$)[\s\S]*/, '}');
+
+			try {
+				const filters = JSON.parse(trimmed.match(/{[\s\S]*?}/)[0]);
+				console.log(await queryDatabase(filters));
+				return '';
+			} catch (e) {
+				console.error('Failed to parse JSON:', e);
+				return response;
+			}
 		}
-		return resp;
+
+		return response;
 	}
 
 	async function handleSearch() {
 		if (!query || searching) return;
 		past_queries.push(query);
+		past_queries = [...past_queries];
 		searching = true;
 
-		const output = await sendPrompt(query, JSON.stringify(await searchFromServer(), null, 2));
+		const output = await sendPrompt(query);
 		[groqInternalThoughts, groqThoughts] = output.split('</think>');
 		searching = false;
+		query = '';
 	}
 
-	async function searchFromServer() {
-		const res = await fetch('/api/data/groqsearch', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ query })
-		});
-		return await res.json();
+	async function queryDatabase(filters) {
+		try {
+			const res = await fetch('/api/data/searchwhere', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ filters })
+			});
+			const data = await res.json();
+			database_response = data.results || [];
+		} catch (err) {
+			console.error('Failed to query database:', err);
+			database_response = [];
+		}
 	}
 </script>
 
 <Navbar />
 
-<!-- 2000s-style Warning Box -->
+<!-- Warning -->
 <div class="mb-4 w-full border border-gray-400 bg-[#ffffe0] px-4 py-3 text-sm text-black">
 	<b>NOTE:</b> This is a <u>work-in-progress</u> AI media search tool. It may not behave as expected.
 </div>
 
-<!-- Query Form -->
+<div class="">
+	<h1>Notes</h1>
+	<p>
+		Serca search engine is an AI chatbot firstly and a search engine second. This is a strength and
+		a weakness at the same time. Below are some notes to keep in mind when using this service.
+	</p>
+	<ul>
+		<li>
+			Be as clear as possible, the less conversation you are the easier time Serca will have
+			processing your requests.
+		</li>
+		<li>Tea</li>
+		<li>Milk</li>
+	</ul>
+</div>
+
+<!-- Form -->
 <div class="mx-auto w-full max-w-4xl px-4 text-left font-sans">
 	<h1 class="mb-4 text-2xl font-bold">Media Search Interface (beta)</h1>
-
-	<hr class="my-2 border-t border-black" />
 
 	<form on:submit|preventDefault={handleSearch}>
 		<label for="query" class="mb-1 block text-base font-bold">Describe your media:</label>
@@ -138,6 +171,19 @@ ${userprompt}`;
 	>
 		{groqThoughts}
 	</div>
+
+	<hr class="my-4 border-t border-black" />
+
+	<h2 class="mb-2 text-xl font-bold">Results:</h2>
+	<ul class="list-disc pl-5 text-sm text-gray-900">
+		{#each database_response as row}
+			<li>
+				{row.url} — {row.meta_data} ({row.mature ? 'Mature' : 'Not Mature'}, {row.child
+					? 'Child'
+					: 'Not Child'})
+			</li>
+		{/each}
+	</ul>
 
 	<hr class="my-4 border-t border-black" />
 
