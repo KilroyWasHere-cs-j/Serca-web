@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Stream } from 'groq-sdk/lib/streaming.mjs';
 	import Navbar from '../../components/Navbar.svelte';
 
 	// Groq
@@ -9,9 +8,6 @@
 	let database = { results: [] };
 	let keywords = [];
 	let words = [];
-
-	let showSearch = false;
-	let showInvalid = false;
 
 	let query = '';
 
@@ -49,7 +45,10 @@
 		let afterThink = match ? match[1].trim() : '';
 		console.log('Groq' + afterThink);
 		afterThink = afterThink.split(' ');
-		database = await searchFromServer(afterThink.join(' '));
+
+		let l_query = afterThink.join(' ');
+		await logSearch(l_query);
+		database = await searchFromServer(l_query);
 	}
 
 	// Sends prompt to Groq API
@@ -68,7 +67,7 @@
 	}
 
 	//Sends query to db API
-	async function searchFromServer(query) {
+	async function searchFromServer(query: String) {
 		console.log('Searching for:', query);
 		const res = await fetch('/api/data/search', {
 			method: 'POST',
@@ -81,6 +80,17 @@
 		const data_r = await res.json();
 		console.log(data_r);
 		return data_r;
+	}
+
+	async function logSearch(search: String) {
+		console.log('Logging search: ', search);
+		const res = await fetch('/api/data/logsearch', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ search })
+		});
 	}
 </script>
 

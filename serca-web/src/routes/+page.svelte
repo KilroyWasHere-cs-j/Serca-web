@@ -143,12 +143,14 @@
 				While the Serca-core is open source access to our database and search engine are not
 				completely free. We need to charge small fees to support the servers and database.
 			</p>
-			<h2>Pay as you go pricing</h2>
+			<br />
+			<h2><strong>Pay as you use pricing</strong></h2>
 			<p>
 				Every new user will have a set number of queries per month free. After these queries are
 				used up, they will be charged pre query.
 			</p>
-			<h2>Always free</h2>
+			<br />
+			<h2><strong>What's always free</strong></h2>
 			<p>The keyword searching method will remain free.</p>
 		</div>
 	</section>
