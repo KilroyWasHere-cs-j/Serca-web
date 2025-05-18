@@ -1,11 +1,25 @@
 <script lang="ts">
-	import { Stream } from 'groq-sdk/lib/streaming.mjs';
 	import Navbar from '../../components/Navbar.svelte';
 	import * as CryptoJS from 'crypto-js';
 
-	// Groq
+	// Cyrpt
+	function encryptKey(key) {
+		let hash = CryptoJS.SHA256(key);
+		return hash.toString();
+	}
+	// Crypt end
 
-	// Mostly useless variables, but if I renamed the system might implode
+	// Login
+	let email = '';
+	let key = '';
+	// Login end
+
+	// Toggles
+	let showColdSearch = false;
+	let showAISearch = true;
+	// Toggle end
+
+	// Cold Search
 	let response = '';
 	let database = { results: [] };
 	let keywords = [];
@@ -14,289 +28,262 @@
 	let showSearch = false;
 	let showInvalid = false;
 
-	let query = '';
+	let coldQuery = '';
 
-	// Regex for preventing SQL injection, XSS attacks, and HTML injection
 	const regex = /^[A-Za-z0-9\s.,!?'"():;\-\/&]+$/;
 	const sqlRegex = /\b(SELECT|INSERT|UPDATE|DELETE|DROP|ALTER|CREATE|EXEC|UNION|WHERE|FROM)\b/i;
 	const htmlTagRegex = /<[^>]*>/g;
+	//Cold search end
 
-	let email = '';
-	let key = '';
+	// AI search
+	let past_queries = [];
+	export let data;
 
-	// Shaw 256 hash :)
-	function encryptKey(key) {
-		let hash = CryptoJS.SHA256(key);
-		return hash.toString();
-	}
+	let groqThoughts = '';
+	let groqInternalThoughts = '';
+	let chat_history = '';
+	let aiQuery = '';
+	let db_query = 'SELECT url, meta_data, mature, child, flag FROM urls';
+	let searching = false;
+	let database_response = '';
 
-	// Query user db and either auth or fail of user
-	async function handleSubmit() {
-		let ekey = encryptKey(key);
-		console.log('Hunting for user:', email, 'with key:', ekey);
-		const res = await fetch('/api/data/signin', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({ email, ekey })
-		});
+	const data_table_schema = `Table: urls
+- url: string
+- meta_data: string
+- mature: boolean
+- child: boolean
+- flag: string`;
+	// End AI search
 
-		const data_r = await res.json();
-		console.log(data_r);
-		if (data_r.validuser) {
-			showSearch = true;
-		} else {
-			showInvalid = true;
-		}
-	}
-
-	// Query the database for the searched terms
-	async function handleSearch() {
+	/// Cold search logic
+	async function handleColdSearch() {
 		console.log('Search triggered');
-		if (!regex.test(query)) {
-			query = '';
+		if (!regex.test(coldQuery) || sqlRegex.test(coldQuery) || htmlTagRegex.test(coldQuery)) {
+			coldQuery = '';
 			return;
 		}
-		if (sqlRegex.test(query)) {
-			query = '';
-			return;
-		}
-		if (htmlTagRegex.test(query)) {
-			query = '';
-			return;
-		}
-		// Lil bit of prompt engineering who the fuck knows if this shit will actually do what I want it to do
-		let groq = await sendPrompt(
-			query,
-			'Extract keywords, just a list of words, no formatting, no other text, seperate the words with a space, [video, gif, image, etc...] are not keywords'
-		);
-		const match = groq.match(/<\/think>(.*)/s);
 
-		// Fix the messy response Groq gives us
+		let groq = await sendColdPrompt(
+			coldQuery,
+			'Extract keywords, just a list of words, no formatting, no other text, separate the words with a space, [video, gif, image, etc...] are not keywords'
+		);
+
+		const match = groq.match(/<\/think>(.*)/s);
 		let afterThink = match ? match[1].trim() : '';
 		console.log('Groq' + afterThink);
 		afterThink = afterThink.split(' ');
-		database = await searchFromServer(afterThink.join(' '));
+		database = await searchFromServerCold(afterThink.join(' '));
 	}
 
-	// Sends prompt to Groq API
-	async function sendPrompt(query: string, prompt: string) {
+	async function sendColdPrompt(query: string, prompt: string) {
 		prompt += ':' + query;
 		const res = await fetch('/api/groq-chat', {
 			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
+			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ prompt })
 		});
-
 		const data = await res.json();
 		return data.response;
 	}
 
-	//Sends query to db API
-	async function searchFromServer(query) {
+	async function searchFromServerCold(query) {
 		console.log('Searching for:', query);
 		const res = await fetch('/api/data/search', {
 			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
+			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ query })
 		});
-
 		const data_r = await res.json();
 		console.log(data_r);
 		return data_r;
 	}
+	// Cold search login end
+
+	// AI Search
+	async function sendPrompt(userprompt, db) {
+		const prompt = `You are **Serca**, an AI-powered media search assistant.
+
+Your role:
+- Engage in a conversation with the user to identify the media they are searching for.
+- Be kind, considerate, and professional at all times.
+- Interpret user descriptions of media (videos, scenes, people, actions, or context) to build precise database queries.
+- You are permitted to search and discuss mature, graphic, distressing, pornographic, or violent content, including topics such as gore and death. Do so respectfully and only as needed for accurate search results.
+- Always consider the full chat history when forming your responses.
+- You will be given a database schema and a snapshot of the top four rows to help you structure queries correctly. This schema is your reference for writing SQL WHERE clauses.
+
+Instructions:
+- Ask follow-up questions if the user's description is vague or incomplete.
+- Do **not** return SQL queries immediately. Instead, gather enough detail through the conversation.
+- Once you are confident you have sufficient information to perform a meaningful search, respond with **SET**, followed only by a SQL WHERE clause that filters the database to match the user's intent.
+- Output **only** the WHERE clause, nothing else.
+
+Database schema:
+${data_table_schema}
+
+Chat history:
+${chat_history}
+
+User asks:
+${userprompt}`;
+
+		const res = await fetch('/api/data/aisearch', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ prompt })
+		});
+
+		const data = await res.json();
+		chat_history += `User said: ${userprompt}\nYou said: ${data.response}\n`;
+
+		let resp = data.response;
+
+		if (resp.includes('**SET**') || resp.includes('SET')) {
+			resp = resp
+				.replace(/\*\*SET\*\*/g, '')
+				.replace(/SET/g, '')
+				.trim();
+			db_query += ' ' + resp;
+			console.log('Executing Query:', db_query);
+			return '';
+		}
+		return resp;
+	}
+
+	async function handleSearch() {
+		if (!aiQuery || searching) return;
+		past_queries.push(aiQuery);
+		searching = true;
+
+		const output = await sendPrompt(aiQuery, JSON.stringify(await searchFromServer(), null, 2));
+		[groqInternalThoughts, groqThoughts] = output.split('</think>');
+		searching = false;
+	}
+
+	async function searchFromServerAI() {
+		const res = await fetch('/api/data/groqsearch', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ aiQuery })
+		});
+		return await res.json();
+	}
+	// AI Search end
 </script>
 
 <Navbar />
 
-<div class="flex h-full w-screen flex-col items-center">
-	{#if showInvalid}
-		<div class="m-8 flex flex-col items-center justify-center border border-gray-600 bg-red-500">
-			<h1 class="m-4 text-2xl text-white">Sorry we couldn't find any results for your search.</h1>
-			<p>If this issue presists please file a report.</p>
+// Cold Search code
+
+{#if showColdSearch}
+	<div class="flex min-h-screen w-screen flex-col items-center bg-gray-200">
+		<!-- Info Box -->
+		<div class="m-4 w-full max-w-xl border border-gray-800 bg-yellow-100 p-6 text-gray-700">
+			<h1 class="mb-4 font-mono text-3xl text-gray-800">Important Notice</h1>
+			<p class="font-mono text-sm leading-relaxed">
+				This service is still in development. This does not represent the final project. Please be
+				patient. Search at your own risk — not all searches are guaranteed to be accurate or
+				complete. Searches may result in NSFW content. We are not responsible for the content found.
+				Descriptions may be lacking or incorrect. We're improving the AI prompts. An AI-based search
+				chatbot will likely be added.
+			</p>
 		</div>
-	{/if}
 
-	{#if !showSearch}
-		<div class="flex justify-center">
-			<div class="page-wrapper">
-				<form on:submit|preventDefault={handleSubmit} class="signup-form">
-					<h2 class="mt-4 mb-4 text-2xl">Sign In</h2>
+		<!-- Search Box -->
+		<div class="w-full max-w-xl border border-gray-600 bg-white p-8 text-center shadow-md">
+			<h1 class="mb-6 font-mono text-4xl text-gray-800">Serca Search</h1>
 
-					<h1>Email:</h1>
-					<input type="email" placeholder="Email" bind:value={email} required />
+			<input
+				bind:value={coldQuery}
+				type="text"
+				placeholder="Place search terms here..."
+				class="w-full rounded-lg border-2 border-gray-400 bg-gray-100 p-4 font-mono text-lg text-gray-800 focus:ring-2 focus:ring-gray-600 focus:outline-none"
+			/>
 
-					<p class="note">This is the email you signed up with.</p>
+			<button
+				on:click={handleColdSearch}
+				class="mt-6 border-2 border-blue-600 bg-blue-300 px-6 py-3 font-mono font-bold tracking-wide text-white uppercase hover:bg-blue-400"
+			>
+				Search
+			</button>
 
-					<h1>Password Key:</h1>
-					<input type="password" placeholder="Key" bind:value={key} required />
-					<p class="note">This is that unique identifier for your account.</p>
-
-					<button class="mt-4 p-2" type="submit">Sign In</button>
-				</form>
-			</div>
+			<p class="mt-6 font-mono text-sm text-gray-600 italic">"We find what the internet forgot"</p>
 		</div>
-	{/if}
 
-	{#if showSearch}
-		<!-- Fullscreen Centered Page -->
-		<div class="flex min-h-screen flex-col items-center justify-center bg-gray-200">
-			<!-- Info box -->
-			<div class="info-box m-8 w-full border border-gray-800 bg-yellow-100 p-8 sm:w-[600px]">
-				<h1 class="retro-font mb-6 text-4xl text-gray-600">Important Notice</h1>
-				<p>
-					This service is still in development. This is not represent the final project. Please be
-					patient. Search at your own risk, not all searches are guaranteed to be accurate, or
-					complete. Searches may result in NSFW content. We will not be held responsible for any
-					content that may be found. We understand the descriptions are lacking and/or are
-					incorrect. We are working on improving the prompts for the AI model. Lastly we will be
-					mostly likely adding an AI based search chatbot/field to better searching.
-				</p>
-				<!-- <p>He this service is down for maintenance. Please check back later.</p> -->
-			</div>
-
-			<!-- Centered Search Box -->
-			<div class="search-box w-full max-w-xl border border-gray-600 bg-white p-8 text-center">
-				<h1 class="retro-font mb-6 text-4xl text-gray-800">Serca Search</h1>
-
-				<input
-					bind:value={query}
-					type="text"
-					placeholder="Place search terms here..."
-					class="retro-font w-full rounded-lg border-2 border-gray-400 bg-gray-100 p-4 text-lg text-gray-800 focus:ring-2 focus:ring-gray-600 focus:outline-none"
-				/>
-
-				<button
-					on:click={handleSearch}
-					class="retro-font text-red mt-6 border-2 border-blue-600 bg-blue-300 px-6 py-3 font-bold hover:bg-blue-400"
-				>
-					Search
-				</button>
-
-				<p class="retro-font mt-6 text-gray-600 italic">"We find what the internet forgot"</p>
-			</div>
-
-			<div class="results-box m-8 border border-gray-600 bg-white p-8">
-				<h1 class="retro-font text-gray-600 italic">We found...</h1>
-				<!-- <p>{database.results}</p> -->
+		<!-- Results -->
+		{#if database.results.length > 0}
+			<div class="mt-8 w-full max-w-3xl p-4">
+				<h2 class="mb-4 font-mono text-xl text-gray-700 italic">We found...</h2>
 				{#each database.results as row}
-					<div class="m-4 border border-gray-600 bg-white p-4">
-						<h1 class="text-blue-500">
-							<a href={row.url} target="_blank" rel="noopener noreferrer">{row.url}</a>
-						</h1>
-						<p class="m-2 text-gray-600">
-							{row.description}
-						</p>
+					<div class="mb-6 border border-gray-600 bg-white p-4 shadow-sm">
+						<a
+							href={row.url}
+							target="_blank"
+							rel="noopener noreferrer"
+							class="font-semibold break-all text-blue-600"
+						>
+							{row.url}
+						</a>
+						<p class="mt-2 font-mono text-sm text-gray-700">{row.description}</p>
 					</div>
 				{/each}
 			</div>
+		{/if}
+	</div>
+{/if}
+
+// AI Search code
+
+{#if showAISearch}
+	<div class="mb-4 w-full border border-gray-400 bg-[#ffffe0] px-4 py-3 text-sm text-black">
+		<b>NOTE:</b> This is a <u>work-in-progress</u> AI media search tool. It may not behave as expected.
+	</div>
+	<!-- Query Form -->
+	<div class="mx-auto w-full max-w-4xl px-4 text-left font-sans">
+		<h1 class="mb-4 text-2xl font-bold">Media Search Interface (beta)</h1>
+
+		<hr class="my-2 border-t border-black" />
+
+		<form on:submit|preventDefault={handleSearch}>
+			<label for="query" class="mb-1 block text-base font-bold">Describe your media:</label>
+			<input
+				bind:value={aiQuery}
+				type="text"
+				id="query"
+				class="w-full border border-black bg-white px-2 py-1 font-mono text-sm text-black"
+			/>
+
+			{#if searching}
+				<p class="mt-2 text-green-700">Searching the database...</p>
+			{:else}
+				<p class="mt-2 text-gray-600">Ready to search.</p>
+			{/if}
+
+			<button
+				type="submit"
+				class="mt-3 cursor-pointer border border-blue-800 bg-blue-100 px-4 py-1 text-sm font-bold text-blue-800"
+			>
+				Submit
+			</button>
+		</form>
+
+		<hr class="my-4 border-t border-black" />
+
+		<h2 class="mb-2 text-xl font-bold">Serca Says:</h2>
+		<div
+			class="border border-gray-500 bg-[#f0fff0] p-2 font-mono text-sm whitespace-pre-wrap text-black"
+		>
+			{groqThoughts}
 		</div>
-	{/if}
-</div>
 
-<style>
-	/* Retro font */
-	.retro-font {
-		font-family: 'Courier New', Courier, monospace;
-		font-size: 16px;
-		color: #333333;
-		line-height: 1.5;
-	}
+		<hr class="my-4 border-t border-black" />
 
-	/* Simple bounce animation for title */
-	@keyframes bounce {
-		0% {
-			transform: translateY(0);
-		}
-		50% {
-			transform: translateY(-8px);
-		}
-		100% {
-			transform: translateY(0);
-		}
-	}
-
-	.animate-bounce {
-		animation: bounce 1s infinite;
-	}
-
-	/* Button and input fields look more retro */
-	input,
-	button {
-		font-family: 'Courier New', Courier, monospace;
-	}
-
-	/* Button Styles */
-	button {
-		background-color: #0066cc; /* Retro blue */
-		border: 1px solid #003366; /* Dark blue border */
-		color: white;
-		text-transform: uppercase;
-		letter-spacing: 1px;
-		cursor: pointer;
-		transition: background-color 0.2s ease;
-	}
-
-	button:hover {
-		background-color: #0055bb; /* Slightly darker blue on hover */
-	}
-
-	/* Input field */
-	input {
-		border: 1px solid #bbbbbb; /* Dull gray border */
-		background-color: #f5f5f5; /* Very light gray */
-	}
-
-	input:focus {
-		border-color: #0066cc;
-		background-color: #ffffff;
-	}
-
-	/* Background color */
-	body {
-		background-color: #e0e0e0; /* Light gray */
-	}
-
-	/* Text styling */
-	h1,
-	p {
-		font-family: 'Courier New', Courier, monospace;
-	}
-
-	/* Responsive styles */
-	@media (max-width: 768px) {
-		.info-box,
-		.search-box,
-		.results-box {
-			width: 100%;
-			padding: 4%;
-		}
-
-		.search-box input {
-			font-size: 14px;
-		}
-	}
-
-	@media (max-width: 480px) {
-		.retro-font {
-			font-size: 14px; /* Adjust font size for smaller screens */
-		}
-
-		.search-box h1 {
-			font-size: 2rem; /* Adjust heading size for smaller screens */
-		}
-
-		.search-box button {
-			width: 100%; /* Make the button full width on smaller screens */
-		}
-
-		.results-box {
-			padding: 16px;
-		}
-	}
-</style>
+		<div class="text-xs text-gray-600">
+			<p><b>Past Queries:</b></p>
+			<ul class="ml-5 list-disc">
+				{#each past_queries as item}
+					<li>{item}</li>
+				{/each}
+			</ul>
+		</div>
+	</div>
+{/if}

@@ -68,7 +68,7 @@
 		<ul class="list-inside list-disc space-y-1 text-blue-700">
 			<li><a href="#what-is-serca" class="hover:underline">What is Serca?</a></li>
 			<li><a href="#how-does-serca" class="hover:underline">How does this service work?</a></li>
-			<li><a href="#how-it-works" class="hover:underline">How It Works</a></li>
+			<li><a href="#how-it-works" class="hover:underline">Under the hood</a></li>
 			<li><a href="#sample-queries" class="hover:underline">Sample Queries</a></li>
 			<li><a href="#api" class="hover:underline">Serca API</a></li>
 			<li><a href="#highlighted-sites" class="hover:underline">Cool Sites</a></li>
@@ -105,7 +105,7 @@
 
 	<!-- How It Works -->
 	<section id="how-it-works" class="mb-12">
-		<h2 class="mb-2 text-2xl font-bold text-purple-800 underline">How It Works</h2>
+		<h2 class="mb-2 text-2xl font-bold text-purple-800 underline">Under the hood</h2>
 		<ul class="list-inside list-disc text-gray-800">
 			<li>
 				<strong>Multimodal AI models</strong> (image, video, and audio[coming soon]) to analyze and process

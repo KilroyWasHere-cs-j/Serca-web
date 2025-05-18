@@ -20,7 +20,7 @@ export async function POST({ request }) {
 				? body.query.toLowerCase().split(/\s+/).filter(Boolean)
 				: [];
 
-		const conditions = keywords.map((kw) => sql`description ILIKE ${`%${kw}%`}`);
+		const conditions = keywords.map((kw) => sql`meta_data ILIKE ${`%${kw}%`}`);
 		const whereClause = conditions.reduce((acc, cond, i) =>
 			i === 0 ? cond : sql`${acc} OR ${cond}`
 		);

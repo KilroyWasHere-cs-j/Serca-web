@@ -17,7 +17,7 @@ export async function POST({ request }) {
 		temperature: 0.6,
 		max_completion_tokens: 32768,
 		top_p: 0.95,
-		stream: false // set to false for simple responses
+		stream: false
 	});
 
 	return json({ response: chatCompletion.choices[0].message.content });
