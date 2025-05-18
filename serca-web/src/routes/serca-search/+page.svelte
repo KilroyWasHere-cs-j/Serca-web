@@ -15,8 +15,8 @@
 	// Login end
 
 	// Toggles
-	let showColdSearch = false;
-	let showAISearch = true;
+	let showColdSearch = true;
+	let showAISearch = false;
 	// Toggle end
 
 	// Cold Search
@@ -172,8 +172,6 @@ ${userprompt}`;
 
 <Navbar />
 
-// Cold Search code
-
 {#if showColdSearch}
 	<div class="flex min-h-screen w-screen flex-col items-center bg-gray-200">
 		<!-- Info Box -->
@@ -230,8 +228,6 @@ ${userprompt}`;
 		{/if}
 	</div>
 {/if}
-
-// AI Search code
 
 {#if showAISearch}
 	<div class="mb-4 w-full border border-gray-400 bg-[#ffffe0] px-4 py-3 text-sm text-black">
