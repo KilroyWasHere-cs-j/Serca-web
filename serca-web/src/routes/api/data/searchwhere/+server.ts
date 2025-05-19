@@ -3,7 +3,7 @@ import 'dotenv/config';
 import { neon } from '@neondatabase/serverless';
 
 const connectionString = process.env.DATABASE_URL as string;
-const sql = baseSql(connectionString);
+const sql = neon(connectionString);
 
 export async function POST({ request }) {
 	try {
