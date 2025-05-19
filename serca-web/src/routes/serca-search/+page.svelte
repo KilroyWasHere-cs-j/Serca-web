@@ -5,6 +5,7 @@
 	let email = '';
 	let key = '';
 	let unlocked = false;
+	let limitHit = false;
 	let unlockfailed = false;
 
 	let past_queries = [];
@@ -38,6 +39,30 @@
 			},
 			body: JSON.stringify({ search })
 		});
+	}
+
+	async function increaseUserCount() {
+		const res = await fetch('/api/data/setuserqcount', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ email })
+		});
+
+		if (res.status === 403) {
+			const { error } = await res.json();
+			console.warn('Limit hit:', error);
+			unlocked = false;
+			limitHit = true;
+			// Handle limit reached — show a message, disable a button, etc.
+		} else if (!res.ok) {
+			const { error } = await res.json();
+			console.error('Server error:', error);
+		} else {
+			const data = await res.json();
+			console.log('Query succeeded:', data);
+		}
 	}
 
 	async function sendPrompt(userprompt) {
@@ -82,6 +107,7 @@ ${userprompt}`;
 
 		chat_history += `User said: ${userprompt}\n You said: ${response}\n`;
 		logSearch(userprompt);
+		increaseUserCount();
 
 		if (response.includes('SET')) {
 			console.log('SET passed');
@@ -123,6 +149,7 @@ ${userprompt}`;
 			});
 			const data = await res.json();
 			database_response = data.results || [];
+			console.log(database_response);
 		} catch (err) {
 			console.error('Failed to query database:', err);
 			database_response = [];
@@ -161,6 +188,16 @@ ${userprompt}`;
 <div class="m-4 border border-gray-400 bg-[#ffffe0] px-4 py-3 text-sm text-black">
 	<b>NOTE:</b> Serca is still being developed. So please bare with whilst we try and get this tool working
 </div>
+
+{#if limitHit}
+	<div class="m-4 border border-gray-400 bg-red-300 p-4">
+		<h1>Hey you ran out of queries!!</h1>
+		<p>
+			This isn't the end of the line you can pay for more... Although that isn't currently
+			supported. It'll be reset next month.
+		</p>
+	</div>
+{/if}
 
 {#if unlockfailed}
 	<div class="m-4 border border-gray-500 bg-red-600 p-4">
