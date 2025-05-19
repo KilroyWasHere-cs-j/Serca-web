@@ -1,7 +1,6 @@
 import { json } from '@sveltejs/kit';
 import 'dotenv/config';
 import { neon } from '@neondatabase/serverless';
-import { sql as baseSql } from '@neondatabase/serverless';
 
 const connectionString = process.env.DATABASE_URL as string;
 const sql = baseSql(connectionString);
