@@ -1,7 +1,6 @@
 import { json } from '@sveltejs/kit';
 import 'dotenv/config';
 import { neon } from '@neondatabase/serverless';
-import * as CryptoJS from 'crypto-js';
 
 const connectionString = process.env.DATABASE_URL as string;
 const sql = neon(connectionString);
@@ -11,12 +10,8 @@ export async function POST({ request }) {
 		const body = await request.json();
 		const { email, ekey } = body;
 
-		console.log('email ', email);
-		console.log('ekey ', ekey);
-
 		const result = await sql`SELECT email, key FROM users WHERE email = ${email} AND key = ${ekey}`;
 
-		console.log(result);
 		if (result.length === 0) {
 			return json({ error: "Can't find user" }, { status: 409 });
 		}

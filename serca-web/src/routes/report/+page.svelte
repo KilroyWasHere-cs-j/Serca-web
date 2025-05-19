@@ -68,6 +68,7 @@
 				<option value="Adult/Mature">Adult/Mature</option>
 				<option value="Gore/Death">Gore/Death</option>
 				<option value="Illegal">Illegal</option>
+				<option value="Request for help">Request help</option>
 				<option value="Other">Other (Please specify)</option>
 			</select>
 

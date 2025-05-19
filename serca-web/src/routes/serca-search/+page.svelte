@@ -2,6 +2,11 @@
 	import Navbar from '../../components/Navbar.svelte';
 	import * as CryptoJS from 'crypto-js';
 
+	let email = '';
+	let key = '';
+	let unlocked = false;
+	let unlockfailed = false;
+
 	let past_queries = [];
 	export let data;
 
@@ -22,6 +27,17 @@
 	function encryptKey(key) {
 		let hash = CryptoJS.SHA256(key);
 		return hash.toString();
+	}
+
+	async function logSearch(search: String) {
+		console.log('Logging search: ', search);
+		const res = await fetch('/api/data/logsearch', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ search })
+		});
 	}
 
 	async function sendPrompt(userprompt) {
@@ -64,7 +80,8 @@ ${userprompt}`;
 		const data = await res.json();
 		let response = data.response;
 
-		chat_history += `User said: ${userprompt}\nYou said: ${response}\n`;
+		chat_history += `User said: ${userprompt}\n You said: ${response}\n`;
+		logSearch(userprompt);
 
 		if (response.includes('SET')) {
 			console.log('SET passed');
@@ -111,88 +128,163 @@ ${userprompt}`;
 			database_response = [];
 		}
 	}
+
+	async function validateUser() {
+		try {
+			let ekey = encryptKey(key);
+			const res = await fetch('/api/data/signin', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ email, ekey })
+			});
+
+			const data = await res.json();
+			if (res.ok && data.validuser) {
+				unlocked = true;
+				unlockfailed = false;
+				return 'User validated successfully!';
+			} else {
+				unlocked = false;
+				unlockfailed = true;
+				return data.error || 'Validation failed.';
+			}
+		} catch (err) {
+			return 'Network or server error.';
+			console.error(err);
+		}
+	}
 </script>
 
 <Navbar />
 
 <!-- Warning -->
-<div class="mb-4 w-full border border-gray-400 bg-[#ffffe0] px-4 py-3 text-sm text-black">
-	<b>NOTE:</b> This is a <u>work-in-progress</u> AI media search tool. It may not behave as expected.
+<div class="m-4 border border-gray-400 bg-[#ffffe0] px-4 py-3 text-sm text-black">
+	<b>NOTE:</b> Serca is still being developed. So please bare with whilst we try and get this tool working
 </div>
 
-<div class="">
-	<h1>Notes</h1>
-	<p>
-		Serca search engine is an AI chatbot firstly and a search engine second. This is a strength and
-		a weakness at the same time. Below are some notes to keep in mind when using this service.
-	</p>
-	<ul>
-		<li>
-			Be as clear as possible, the less conversation you are the easier time Serca will have
-			processing your requests.
-		</li>
-		<li>Tea</li>
-		<li>Milk</li>
-	</ul>
-</div>
+{#if unlockfailed}
+	<div class="m-4 border border-gray-500 bg-red-600 p-4">
+		<h1>Login failed</h1>
+		<p>Something isn't right about the credentials you gave us</p>
+	</div>
+{/if}
 
-<!-- Form -->
-<div class="mx-auto w-full max-w-4xl px-4 text-left font-sans">
-	<h1 class="mb-4 text-2xl font-bold">Media Search Interface (beta)</h1>
-
-	<form on:submit|preventDefault={handleSearch}>
-		<label for="query" class="mb-1 block text-base font-bold">Describe your media:</label>
+{#if !unlocked}
+	<div class="m-4 bg-green-300 p-4 p-10">
+		<h1>Login</h1>
+		<label for="email" class="mb-1 block text-base font-bold">Email:</label>
 		<input
-			bind:value={query}
+			bind:value={email}
 			type="text"
-			id="query"
+			id="email"
 			class="w-full border border-black bg-white px-2 py-1 font-mono text-sm text-black"
 		/>
 
-		{#if searching}
-			<p class="mt-2 text-green-700">Searching the database...</p>
-		{:else}
-			<p class="mt-2 text-gray-600">Ready to search.</p>
-		{/if}
+		<label for="key" class="mb-1 block text-base font-bold">Key:</label>
+		<input
+			bind:value={key}
+			type="text"
+			id="key"
+			class="w-full border border-black bg-white px-2 py-1 font-mono text-sm text-black"
+		/>
 
 		<button
-			type="submit"
 			class="mt-3 cursor-pointer border border-blue-800 bg-blue-100 px-4 py-1 text-sm font-bold text-blue-800"
+			on:click={validateUser}
 		>
-			Submit
+			Login
 		</button>
-	</form>
-
-	<hr class="my-4 border-t border-black" />
-
-	<h2 class="mb-2 text-xl font-bold">Serca Says:</h2>
-	<div
-		class="border border-gray-500 bg-[#f0fff0] p-2 font-mono text-sm whitespace-pre-wrap text-black"
-	>
-		{groqThoughts}
 	</div>
+{/if}
 
-	<hr class="my-4 border-t border-black" />
-
-	<h2 class="mb-2 text-xl font-bold">Results:</h2>
-	<ul class="list-disc pl-5 text-sm text-gray-900">
-		{#each database_response as row}
+{#if unlocked}
+	<div class="mb-4 w-full border border-gray-400 bg-blue-300 p-4">
+		<h1><b>NOTES:</b></h1>
+		<br />
+		<p>
+			Serca search engine is an AI chatbot firstly and a search engine second. This is a strength
+			and a weakness at the same time. Below are some notes to keep in mind when using this service.
+		</p>
+		<ul>
+			<br />
 			<li>
-				{row.url} — {row.meta_data} ({row.mature ? 'Mature' : 'Not Mature'}, {row.child
-					? 'Child'
-					: 'Not Child'})
+				- Be as clear as possible, the less conversational you are the easier time Serca will have
+				processing your requests.
 			</li>
-		{/each}
-	</ul>
-
-	<hr class="my-4 border-t border-black" />
-
-	<div class="text-xs text-gray-600">
-		<p><b>Past Queries:</b></p>
-		<ul class="ml-5 list-disc">
-			{#each past_queries as item}
-				<li>{item}</li>
-			{/each}
+			<br />
+			<li>
+				- Serca can lock up and run into issues where it continually attempts to prompt users for
+				context and never runs a search. In these cases you will likely need to directly override
+				the model. There are a couple methods to do this, but often saying "that's all I know" or
+				"trigger search" is enough to start a search. If the issue continues please report the
+				issue. And we will take a look.
+			</li>
+			<br />
+			<li>
+				- Serca will often ask you to note if the content is mature/adult in nature. Even if the
+				content is seemingly unrelated to mature/adult themes. Why is this needed? See rule 34.
+			</li>
 		</ul>
 	</div>
-</div>
+
+	<!-- Form -->
+	<div class="mx-auto w-full max-w-4xl px-4 text-left font-sans">
+		<h1 class="mb-4 text-2xl font-bold">Media Search Interface (beta)</h1>
+
+		<form on:submit|preventDefault={handleSearch}>
+			<label for="query" class="mb-1 block text-base font-bold">Describe your media:</label>
+			<input
+				bind:value={query}
+				type="text"
+				id="query"
+				class="w-full border border-black bg-white px-2 py-1 font-mono text-sm text-black"
+			/>
+
+			{#if searching}
+				<p class="mt-2 text-green-700">Searching the database...</p>
+			{:else}
+				<p class="mt-2 text-gray-600">Ready to search.</p>
+			{/if}
+
+			<button
+				type="submit"
+				class="mt-3 cursor-pointer border border-blue-800 bg-blue-100 px-4 py-1 text-sm font-bold text-blue-800"
+			>
+				Submit
+			</button>
+		</form>
+
+		<hr class="my-4 border-t border-black" />
+
+		<h2 class="mb-2 text-xl font-bold">Serca Says:</h2>
+		<div
+			class="border border-gray-500 bg-[#f0fff0] p-2 font-mono text-sm whitespace-pre-wrap text-black"
+		>
+			{groqThoughts}
+		</div>
+
+		<hr class="my-4 border-t border-black" />
+
+		<h2 class="mb-2 text-xl font-bold">Results:</h2>
+		<ul class="list-disc pl-5 text-sm text-gray-900">
+			{#each database_response as row}
+				<li>
+					{row.url} — {row.meta_data} ({row.mature ? 'Mature' : 'Not Mature'}, {row.child
+						? 'Child'
+						: 'Not Child'})
+				</li>
+			{/each}
+		</ul>
+
+		<hr class="my-4 border-t border-black" />
+
+		<div class="text-xs text-gray-600">
+			<p><b>Past Queries:</b></p>
+			<ul class="ml-5 list-disc">
+				{#each past_queries as item}
+					<li>{item}</li>
+				{/each}
+			</ul>
+		</div>
+	</div>
+{/if}
