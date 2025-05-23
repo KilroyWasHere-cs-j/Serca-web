@@ -1,5 +1,21 @@
 <script lang="ts">
 	import Navbar from '../../components/Navbar.svelte';
+
+	const steps = [
+		{ id: 'seed', label: 'Seed URLs', x: 50, y: 50 },
+		{ id: 'scraper', label: 'Web Scraper', x: 250, y: 50 },
+		{ id: 'subdomains', label: 'Extract Subdomains', x: 250, y: 150 },
+		{ id: 'to-scraper', label: 'Subdomains → Scraper', x: 450, y: 100 },
+		{ id: 'ai', label: 'AI Pipeline', x: 650, y: 100 },
+		{ id: 'db', label: 'Update Database', x: 850, y: 100 }
+	];
+
+	const aiStages = [
+		{ label: 'OCR', dx: 0, dy: -60 },
+		{ label: 'YOLOv5', dx: 0, dy: -30 },
+		{ label: 'BLIP', dx: 0, dy: 0 },
+		{ label: 'Image Features', dx: 0, dy: 30 }
+	];
 </script>
 
 <Navbar />
@@ -7,10 +23,8 @@
 <div class="mx-auto max-w-full border-x border-gray-300 bg-white px-5 py-10 font-mono text-[#333]">
 	<!-- Header -->
 	<div class="mb-10 text-center">
-		<h1 class="text-3xl text-[#003366]">SercaDB</h1>
-		<p class="mt-2 text-sm text-gray-600 italic">
-			"Built for storing video descriptions, capable of storing pie recipes."
-		</p>
+		<h1 class="text-3xl text-[#003366]">Information</h1>
+		<p class="mt-2 text-sm text-gray-600 italic">"It's like documentation, but less informative"</p>
 	</div>
 
 	<!-- Table of Contents -->
@@ -27,7 +41,10 @@
 	<!-- Overview -->
 	<section id="overview" class="mb-10">
 		<h2 class="mb-2 text-xl text-purple-800">💾 Overview</h2>
-		<p></p>
+		<p>
+			This page covers information that will help users understand Serca. Hopefully beyond and basic
+			level. It also covers information about the service it's self.
+		</p>
 	</section>
 
 	<!-- Architecture Overview -->
@@ -35,8 +52,10 @@
 		<h2 class="mb-2 text-xl text-purple-800">🛠️ Architecture Overview</h2>
 		<p class="leading-relaxed text-gray-700"></p>
 
-		<h3 class="mt-8 text-lg font-bold">Data Table Peek</h3>
-		<p class="mt-2">This is a snippet of our database (dummy data):</p>
+		<h3 class="mt-8 text-lg font-bold">Serca overview layout</h3>
+		<p class="mt-2"></p>
+
+		<div class=""></div>
 
 		<div class="mt-4 overflow-x-auto"></div>
 	</section>

@@ -186,8 +186,13 @@ ${userprompt}`;
 
 <!-- Warning -->
 <div class="m-4 border border-gray-400 bg-[#ffffe0] px-4 py-3 text-sm text-black">
-	<b>NOTE:</b> Serca is still being developed. So please bare with whilst we try and get this tool working
+	<p>
+		<b>NOTE:</b> This tool isn't currently connected to a database. We will email when it is. Your welcome
+		to still fiddle with it just don't expect anything just yet...
+	</p>
 </div>
+
+<!-- Serca is still being developed. So please bare with whilst we try and get this tool working -->
 
 {#if limitHit}
 	<div class="m-4 border border-gray-400 bg-red-300 p-4">
