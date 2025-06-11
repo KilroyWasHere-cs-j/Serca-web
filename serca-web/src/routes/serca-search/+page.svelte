@@ -187,8 +187,8 @@ ${userprompt}`;
 <!-- Warning -->
 <div class="m-4 border border-gray-400 bg-[#ffffe0] px-4 py-3 text-sm text-black">
 	<p>
-		<b>NOTE:</b> This tool isn't currently connected to a database. We will email when it is. Your welcome
-		to still fiddle with it just don't expect anything just yet...
+		<b>NOTE:</b> This isn't goning to work yet... It's not currently connected to a the database. We're
+		still refining the search function. We will email when everything is workable.
 	</p>
 </div>
 
@@ -212,7 +212,7 @@ ${userprompt}`;
 {/if}
 
 {#if !unlocked}
-	<div class="m-4 bg-green-300 p-4 p-10">
+	<div class="m-4 bg-green-300 p-10">
 		<h1>Login</h1>
 		<label for="email" class="mb-1 block text-base font-bold">Email:</label>
 		<input
