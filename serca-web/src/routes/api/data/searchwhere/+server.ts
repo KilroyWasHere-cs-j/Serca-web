@@ -9,51 +9,24 @@ export async function POST({ request }) {
 	try {
 		const body = await request.json();
 		const { filters } = body;
-		console.log('Filters:', filters);
+		const { keywords, ...remaining } = filters;
+		console.log(keywords);
+		console.log(remaining);
 
 		if (!filters) {
 			return json({ results: [], error: 'No filters provided.' }, { status: 400 });
 		}
 
-		let conditions: string[] = [];
-		let values: any[] = [];
+		const queryHead = `SELECT url, meta_data, mature, child, flag FROM urls`;
+		const whereClause =
+			keywords.length > 0
+				? ` WHERE meta_data ILIKE ANY (ARRAY[' %${keywords.join("%', '%")}% '])`
+				: '';
+		// const flags = 'AND'
 
-		for (const condition of conditions) {
-			values.push(condition));
-		}
+		const query = queryHead + whereClause;
 
-		console.log('Values:', values);
-
-		// SELECT url, meta_data
-		// FROM urls
-		// WHERE meta_data ILIKE ANY (ARRAY[
-		//   '%people and cats playing outdoors%',
-		//   '%outdoor play between humans and cats%',
-		//   '%cats interacting with humans%',
-		//   '%playful cats%',
-		//   '%outdoor setting%',
-		//   '%casual%',
-		//   '%fun%',
-		//   '%chasing%',
-		//   '%running%',
-		//   '%cuddling%',
-		//   '%backyard%',
-		//   '%park%',
-		//   '%sunlight%',
-		//   '%nature%',
-		//   '%children playing with cats%',
-		//   '%pet interaction%',
-		//   '%leash%',
-		//   '%frisbee%',
-		//   '%fetch%'
-		// ])
-
-		const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
-		const queryText = `SELECT url, meta_data, mature, child, flag FROM urls ${whereClause} LIMIT 20`;
-
-		console.log('QUERY:', queryText);
-
-		const result = await sql.query(queryText, values);
+		const result = await sql.query(query);
 		return json({ results: result.rows, error: null });
 	} catch (err) {
 		console.error('DB query error:', err);

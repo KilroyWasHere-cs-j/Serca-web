@@ -140,7 +140,30 @@ ${userprompt}`;
 		query = '';
 	}
 
-	async function queryDatabase(filters) {
+	//async function queryDatabase(filters) {
+	async function queryDatabase() {
+		let filters = {
+			keywords: [
+				'water',
+				'lake',
+				'ocean',
+				'river',
+				'waves',
+				'stream',
+				'sea',
+				'pond',
+				'hydro',
+				'liquid',
+				'flowing',
+				'splash',
+				'waterfall',
+				'beach',
+				'surf',
+				'current'
+			],
+			mature: false,
+			child: false
+		};
 		try {
 			const res = await fetch('/api/data/searchwhere', {
 				method: 'POST',
@@ -240,6 +263,12 @@ ${userprompt}`;
 {/if}
 
 {#if unlocked}
+	<button
+		class="mt-3 cursor-pointer border border-blue-800 bg-blue-100 px-4 py-1 text-sm font-bold text-blue-800"
+		on:click={queryDatabase}
+	>
+		Force Search
+	</button>
 	<div class="mb-4 w-full border border-gray-400 bg-blue-300 p-4">
 		<h1><b>NOTES:</b></h1>
 		<br />
