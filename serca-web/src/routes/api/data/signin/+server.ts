@@ -8,9 +8,10 @@ const sql = neon(connectionString);
 export async function POST({ request }) {
 	try {
 		const body = await request.json();
-		const { email, ekey } = body;
+		const { lemail, ekey } = body;
 
-		const result = await sql`SELECT email, key FROM users WHERE email = ${email} AND key = ${ekey}`;
+		const result =
+			await sql`SELECT email, key FROM users WHERE email = ${lemail} AND key = ${ekey}`;
 
 		if (result.length === 0) {
 			return json({ error: "Can't find user" }, { status: 409 });

@@ -1,31 +1,48 @@
+<!-- Future Gabe this code is shit please refactor -->
 <script lang="ts">
 	import Navbar from '../../components/Navbar.svelte';
 	import * as CryptoJS from 'crypto-js';
 
-	let email = '';
-	let key = '';
-	let unlocked = false;
-	let limitHit = false;
-	let unlockfailed = false;
+	let states = {
+		// Initialize state properties here
+		unlocked: false,
+		baduser: false,
+		limitHit: false,
+		showResults: false,
+		searching: false
+	};
 
-	let past_queries = [];
-	export let data;
+	let user = {
+		// Initialize user properties here
+		email: '',
+		key: ''
+	};
 
-	let groqThoughts = '';
-	let groqInternalThoughts = '';
-	let chat_history = '';
-	let query = '';
-	let searching = false;
-	let database_response: any = [];
+	let history = {
+		// Initialize history properties here
+		past_queries: [],
+		chat_history: ''
+	};
 
-	const data_table_schema = `Table: urls
+	let ai = {
+		// Initialize AI properties here
+		groqThoughts: '',
+		groqInternalThoughts: ''
+	};
+
+	let database = {
+		// Initialize database properties here
+		query: '',
+		database_response: [],
+		data_table_schema: `Table: urls
 - url: string
 - meta_data: string
 - mature: boolean
 - child: boolean
-- flag: string`;
+- flag: string`
+	};
 
-	function encryptKey(key) {
+	function encryptKey(key: string) {
 		let hash = CryptoJS.SHA256(key);
 		return hash.toString();
 	}
@@ -42,19 +59,20 @@
 	}
 
 	async function increaseUserCount() {
+		let lemail = user.email;
 		const res = await fetch('/api/data/setuserqcount', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({ email })
+			body: JSON.stringify({ lemail })
 		});
 
 		if (res.status === 403) {
 			const { error } = await res.json();
 			console.warn('Limit hit:', error);
-			unlocked = false;
-			limitHit = true;
+			states.unlocked = false;
+			states.limitHit = true;
 			// Handle limit reached — show a message, disable a button, etc.
 		} else if (!res.ok) {
 			const { error } = await res.json();
@@ -65,7 +83,7 @@
 		}
 	}
 
-	async function sendPrompt(userprompt) {
+	async function sendPrompt(userprompt: string) {
 		const prompt = `You are **Serca**, an AI-powered media search assistant.
 
 Your role:
@@ -88,10 +106,10 @@ json {
 }
 
 Database schema:
-${data_table_schema}
+${database.data_table_schema}
 
 Chat history:
-${chat_history}
+${history.chat_history}
 
 User asks:
 ${userprompt}`;
@@ -105,7 +123,7 @@ ${userprompt}`;
 		const data = await res.json();
 		let response = data.response;
 
-		chat_history += `User said: ${userprompt}\n You said: ${response}\n`;
+		history.chat_history += `User said: ${userprompt}\n You said: ${response}\n`;
 		logSearch(userprompt);
 		increaseUserCount();
 
@@ -124,20 +142,19 @@ ${userprompt}`;
 				return response;
 			}
 		}
-
 		return response;
 	}
 
 	async function handleSearch() {
-		if (!query || searching) return;
-		past_queries.push(query);
-		past_queries = [...past_queries];
-		searching = true;
+		if (!database.query || states.searching) return;
+		history.past_queries.push(database.query);
+		history.past_queries = [...history.past_queries];
+		states.searching = true;
 
-		const output = await sendPrompt(query);
-		[groqInternalThoughts, groqThoughts] = output.split('</think>');
-		searching = false;
-		query = '';
+		const output = await sendPrompt(database.query);
+		[ai.groqInternalThoughts, ai.groqThoughts] = output.split('</think>');
+		states.searching = false;
+		database.query = '';
 	}
 
 	//async function queryDatabase(filters) {
@@ -171,36 +188,40 @@ ${userprompt}`;
 				body: JSON.stringify({ filters })
 			});
 			const data = await res.json();
-			database_response = data.results || [];
-			console.log(database_response);
+			database.database_response = data.results || [];
+			console.log(database.database_response);
 		} catch (err) {
 			console.error('Failed to query database:', err);
-			database_response = [];
+			database.database_response = [];
 		}
 	}
 
 	async function validateUser() {
+		console.log('Attempting to validate user');
 		try {
-			let ekey = encryptKey(key);
+			let ekey = encryptKey(user.key);
+			let lemail = user.email;
 			const res = await fetch('/api/data/signin', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ email, ekey })
+				body: JSON.stringify({ lemail, ekey })
 			});
 
 			const data = await res.json();
 			if (res.ok && data.validuser) {
-				unlocked = true;
-				unlockfailed = false;
+				states.unlocked = true;
+				states.baduser = false;
+				console.log('User validated successfully!');
 				return 'User validated successfully!';
 			} else {
-				unlocked = false;
-				unlockfailed = true;
+				states.unlocked = false;
+				states.baduser = true;
+				console.log(data.error || 'Validation failed.');
 				return data.error || 'Validation failed.';
 			}
 		} catch (err) {
 			return 'Network or server error.';
-			console.error(err);
+			console.error('err', err);
 		}
 	}
 </script>
@@ -210,14 +231,14 @@ ${userprompt}`;
 <!-- Warning -->
 <div class="m-4 border border-gray-400 bg-[#ffffe0] px-4 py-3 text-sm text-black">
 	<p>
-		<b>NOTE:</b> This isn't goning to work yet... It's not currently connected to a the database. We're
+		<b>NOTE:</b> This isn't going to work yet... It's not currently connected to a the database. We're
 		still refining the search function. We will email when everything is workable.
 	</p>
 </div>
 
 <!-- Serca is still being developed. So please bare with whilst we try and get this tool working -->
 
-{#if limitHit}
+{#if states.limitHit}
 	<div class="m-4 border border-gray-400 bg-red-300 p-4">
 		<h1>Hey you ran out of queries!!</h1>
 		<p>
@@ -227,19 +248,19 @@ ${userprompt}`;
 	</div>
 {/if}
 
-{#if unlockfailed}
+{#if states.baduser}
 	<div class="m-4 border border-gray-500 bg-red-600 p-4">
 		<h1>Login failed</h1>
 		<p>Something isn't right about the credentials you gave us</p>
 	</div>
 {/if}
 
-{#if !unlocked}
+{#if !states.unlocked}
 	<div class="m-4 bg-green-300 p-10">
 		<h1>Login</h1>
 		<label for="email" class="mb-1 block text-base font-bold">Email:</label>
 		<input
-			bind:value={email}
+			bind:value={user.email}
 			type="text"
 			id="email"
 			class="w-full border border-black bg-white px-2 py-1 font-mono text-sm text-black"
@@ -247,7 +268,7 @@ ${userprompt}`;
 
 		<label for="key" class="mb-1 block text-base font-bold">Key:</label>
 		<input
-			bind:value={key}
+			bind:value={user.key}
 			type="text"
 			id="key"
 			class="w-full border border-black bg-white px-2 py-1 font-mono text-sm text-black"
@@ -262,7 +283,7 @@ ${userprompt}`;
 	</div>
 {/if}
 
-{#if unlocked}
+{#if states.unlocked}
 	<button
 		class="mt-3 cursor-pointer border border-blue-800 bg-blue-100 px-4 py-1 text-sm font-bold text-blue-800"
 		on:click={queryDatabase}
@@ -305,13 +326,13 @@ ${userprompt}`;
 		<form on:submit|preventDefault={handleSearch}>
 			<label for="query" class="mb-1 block text-base font-bold">Describe your media:</label>
 			<input
-				bind:value={query}
+				bind:value={database.query}
 				type="text"
 				id="query"
 				class="w-full border border-black bg-white px-2 py-1 font-mono text-sm text-black"
 			/>
 
-			{#if searching}
+			{#if states.searching}
 				<p class="mt-2 text-green-700">Searching the database...</p>
 			{:else}
 				<p class="mt-2 text-gray-600">Ready to search.</p>
@@ -331,14 +352,14 @@ ${userprompt}`;
 		<div
 			class="border border-gray-500 bg-[#f0fff0] p-2 font-mono text-sm whitespace-pre-wrap text-black"
 		>
-			{groqThoughts}
+			{ai.groqThoughts}
 		</div>
 
 		<hr class="my-4 border-t border-black" />
 
 		<h2 class="mb-2 text-xl font-bold">Results:</h2>
 		<ul class="list-disc pl-5 text-sm text-gray-900">
-			{#each database_response as row}
+			{#each database.database_response as row}
 				<li>
 					{row.url} — {row.meta_data} ({row.mature ? 'Mature' : 'Not Mature'}, {row.child
 						? 'Child'
@@ -352,7 +373,7 @@ ${userprompt}`;
 		<div class="text-xs text-gray-600">
 			<p><b>Past Queries:</b></p>
 			<ul class="ml-5 list-disc">
-				{#each past_queries as item}
+				{#each history.past_queries as item}
 					<li>{item}</li>
 				{/each}
 			</ul>
