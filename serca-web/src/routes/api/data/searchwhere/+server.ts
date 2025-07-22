@@ -6,6 +6,7 @@ const connectionString = process.env.DATABASE_URL as string;
 const sql = neon(connectionString);
 
 export async function POST({ request }) {
+	console.log('Got request');
 	try {
 		const body = await request.json();
 		const { filters } = body;
@@ -25,9 +26,11 @@ export async function POST({ request }) {
 		// const flags = 'AND'
 
 		const query = queryHead + whereClause;
+		console.log('Built query: ', query);
 
 		const result = await sql.query(query);
-		return json({ results: result.rows, error: null });
+		console.log(result);
+		return json({ results: result, error: null });
 	} catch (err) {
 		console.error('DB query error:', err);
 		return json({ results: [], error: 'Internal Server Error' }, { status: 500 });

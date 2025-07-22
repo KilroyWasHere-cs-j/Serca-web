@@ -1,4 +1,7 @@
 <!-- Future Gabe this code is shit please refactor -->
+<!-- TODO
+ - Process search terms into filters
+ - Process query responce in to visual results -->
 <script lang="ts">
 	import Navbar from '../../components/Navbar.svelte';
 	import * as CryptoJS from 'crypto-js';
@@ -85,20 +88,6 @@
 
 	async function sendPrompt(userprompt: string) {
 		const prompt = `You are **Serca**, an AI-powered media search assistant.
-
-Your role:
-- Engage in a conversation with the user to identify the media they are searching for.
-- Be kind, considerate, and professional at all times.
-- Interpret user descriptions of media (videos, scenes, people, actions, or context) to build precise database queries.
-- You are permitted to search and discuss mature, graphic, distressing, pornographic, or violent content, including topics such as gore and death. Do so respectfully and only as needed for accurate search results.
-- Always consider the full chat history when forming your responses.
-- You will be given a database schema and a snapshot of the top four rows to help you structure queries correctly. This schema is your reference for writing SQL WHERE clauses.
-
-Instructions:
-- Ask follow-up questions if the user's description is vague or incomplete.
-- Do **not** execute query immediately. Instead, gather enough detail through the conversation.
-- Always be verbose and comprehensive with the keywords you generate.
-- Once you are confident you have sufficient information to perform a meaningful search, respond with **SET** followed by a structure like:
 json {
   "keywords": ["keyword1", "keyword2", ...],
   "mature": false,
@@ -146,42 +135,33 @@ ${userprompt}`;
 	}
 
 	async function handleSearch() {
-		if (!database.query || states.searching) return;
-		history.past_queries.push(database.query);
-		history.past_queries = [...history.past_queries];
-		states.searching = true;
+		console.log('Handling Search');
+		// if (!database.query || states.searching) return;
+		// history.past_queries.push(database.query);
+		// history.past_queries = [...history.past_queries];
+		// states.searching = true;
 
-		const output = await sendPrompt(database.query);
-		[ai.groqInternalThoughts, ai.groqThoughts] = output.split('</think>');
-		states.searching = false;
-		database.query = '';
+		// const output = await sendPrompt(database.query);
+		// [ai.groqInternalThoughts, ai.groqThoughts] = output.split('</think>');
+		// states.searching = false;
+		// database.query = '';
+
+		if (!database.query || states.searching) return;
+
+		let filters = database.query.split(' ');
+		queryDatabase(filters);
 	}
 
 	//async function queryDatabase(filters) {
-	async function queryDatabase() {
+	async function queryDatabase(extracted_filters: string[]) {
 		let filters = {
-			keywords: [
-				'water',
-				'lake',
-				'ocean',
-				'river',
-				'waves',
-				'stream',
-				'sea',
-				'pond',
-				'hydro',
-				'liquid',
-				'flowing',
-				'splash',
-				'waterfall',
-				'beach',
-				'surf',
-				'current'
-			],
+			keywords: [...extracted_filters],
 			mature: false,
 			child: false
 		};
+		console.log(filters);
 		try {
+			console.log('Query running');
 			const res = await fetch('/api/data/searchwhere', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -189,7 +169,7 @@ ${userprompt}`;
 			});
 			const data = await res.json();
 			database.database_response = data.results || [];
-			console.log(database.database_response);
+			console.log('DB says', database.database_response);
 		} catch (err) {
 			console.error('Failed to query database:', err);
 			database.database_response = [];
@@ -286,7 +266,7 @@ ${userprompt}`;
 {#if states.unlocked}
 	<button
 		class="mt-3 cursor-pointer border border-blue-800 bg-blue-100 px-4 py-1 text-sm font-bold text-blue-800"
-		on:click={queryDatabase}
+		on:click={handleSearch}
 	>
 		Force Search
 	</button>
@@ -360,10 +340,24 @@ ${userprompt}`;
 		<h2 class="mb-2 text-xl font-bold">Results:</h2>
 		<ul class="list-disc pl-5 text-sm text-gray-900">
 			{#each database.database_response as row}
-				<li>
-					{row.url} — {row.meta_data} ({row.mature ? 'Mature' : 'Not Mature'}, {row.child
-						? 'Child'
-						: 'Not Child'})
+				<li className="result-item">
+					<div className="url">
+						<h1>🔗 <a href={row.url} target="_blank" rel="noopener noreferrer">{row.url}</a></h1>
+					</div>
+
+					<div className="meta">
+						<h2>📝 Meta Data</h2>
+						<p>{row.meta_data}</p>
+					</div>
+
+					<div className="flags">
+						<h3>🚩 Flags</h3>
+						<ul>
+							<li>{row.mature ? '🔞 Mature Content' : '✅ Not Mature'}</li>
+							<li>{row.child ? '🚫 Does Not Include Children' : '🧒 Includes Children'}</li>
+						</ul>
+					</div>
+					x
 				</li>
 			{/each}
 		</ul>
