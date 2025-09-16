@@ -172,6 +172,13 @@
 <!-- Announcements -->
 <div class="mx-auto mt-6 max-w-5xl px-4">
 	<Announcements
+		title="API Development"
+		date="September 15, 2025"
+		type="Development Milestone"
+		content="Between summer and school I haven't been able to work on this as I should be. But in that time I managed to build an AI embedding search engine that I think will work well here.
+		As such I will be implementing it into Serca."
+	/>
+	<Announcements
 		title="Back end and AI updates"
 		date="May 17, 2025"
 		type="Development Milestone"

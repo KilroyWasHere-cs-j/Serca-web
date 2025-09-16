@@ -88,20 +88,13 @@
 
 	async function sendPrompt(userprompt: string) {
 		const prompt = `You are **Serca**, an AI-powered media search assistant.
-json {
-  "keywords": ["keyword1", "keyword2", ...],
-  "mature": false,
-  "child": true
-}
+		Select the top 5 best matches that relate to the user's query. Suggest terms to enhance a users query
 
-Database schema:
-${database.data_table_schema}
+		Chat history:
+		${history.chat_history}
 
-Chat history:
-${history.chat_history}
-
-User asks:
-${userprompt}`;
+		User asks:
+		${userprompt}`;
 
 		const res = await fetch('/api/data/aisearch', {
 			method: 'POST',
@@ -136,18 +129,9 @@ ${userprompt}`;
 
 	async function handleSearch() {
 		console.log('Handling Search');
-		// if (!database.query || states.searching) return;
-		// history.past_queries.push(database.query);
-		// history.past_queries = [...history.past_queries];
-		// states.searching = true;
-
-		// const output = await sendPrompt(database.query);
-		// [ai.groqInternalThoughts, ai.groqThoughts] = output.split('</think>');
-		// states.searching = false;
-		// database.query = '';
+		sendPrompt('woman swimming');
 
 		if (!database.query || states.searching) return;
-
 		let filters = database.query.split(' ');
 		queryDatabase(filters);
 	}
