@@ -172,6 +172,12 @@
 <!-- Announcements -->
 <div class="mx-auto mt-6 max-w-5xl px-4">
 	<Announcements
+		title="Spanish localization"
+		date="September 15, 2025"
+		type="Development Milestone"
+		content="I have located someone willing to translate the website into Spanish. At somepoint we will try and do this for more languages."
+	/>
+	<Announcements
 		title="API Development"
 		date="September 15, 2025"
 		type="Development Milestone"
