@@ -2,10 +2,8 @@ import { json } from '@sveltejs/kit';
 import 'dotenv/config';
 import { neon } from '@neondatabase/serverless';
 
-const connectionString = process.env.DATABASE_URL as string;
-const sql = neon(connectionString);
-
 export async function POST({ request }) {
+	console.log('Got request');
 	try {
 		const body = await request.json();
 		const rawQuery = typeof body.query === 'string' ? body.query.trim() : null;
