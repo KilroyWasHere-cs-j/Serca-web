@@ -9,6 +9,7 @@ export async function POST({ request }) {
 	try {
 		const body = await request.json();
 		const rawQuery = typeof body.query === 'string' ? body.query.trim() : null;
+		console.log('Raw query:', rawQuery);
 
 		if (!rawQuery || rawQuery.length > 200) {
 			return new Response('Invalid or missing query', { status: 400 });
