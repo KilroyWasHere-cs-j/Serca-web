@@ -1,319 +1,331 @@
 <script lang="ts">
+	// ---------------------------------------------
+	// Home / Landing Page
+	// - Uses the same "clean cards + rounded-2xl + soft borders" aesthetic
+	//   as your search page.
+	// - Adds clear comments, removes duplicate CSS, and makes popup cookie UX work.
+	// ---------------------------------------------
+
+	// UI components
 	import Navbar from '../components/Navbar.svelte';
 	import Announcements from '../components/Announcements.svelte';
 	import HighlightedSites from '../components/HighlightedSites.svelte';
 	import Newsletter from '../components/Newsletter.svelte';
 	import Vudoo from '../components/Vudoo.svelte';
+
+	// Vercel instrumentation (Speed Insights is used; Analytics is imported but not used)
+	// NOTE: If you want analytics, call injectAnalytics() too.
 	import { injectAnalytics } from '@vercel/analytics/sveltekit';
 	import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
 
-	injectSpeedInsights();
+	import { onMount } from 'svelte';
 
+	// Enable Vercel performance tooling
+	injectSpeedInsights();
+	// injectAnalytics(); // uncomment if you actually want analytics enabled
+
+	// ---------------------------------------------
+	// Cookie popup state
+	// ---------------------------------------------
 	let showPopup = false;
 
-	// Check if the "visited" cookie is set
-	function checkFirstVisit() {
-		const visited = getCookie('visited');
-		if (!visited) {
-			showPopup = true;
-		}
-	}
-
-	// Set a cookie
-	function setCookie(name, value, days) {
-		const d = new Date();
-		d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000); // Set expiry date
-		const expires = 'expires=' + d.toUTCString();
-		document.cookie = `${name}=${value}; ${expires}; path=/`;
-	}
-
-	// Get a cookie by name
-	function getCookie(name) {
-		const decodedCookies = decodeURIComponent(document.cookie);
+	/**
+	 * Read a cookie by name.
+	 * Returns empty string if missing.
+	 */
+	function getCookie(name: string): string {
+		// document.cookie -> "a=b; c=d; ..."
+		const decodedCookies = decodeURIComponent(document.cookie || '');
 		const cookieArr = decodedCookies.split(';');
+
 		for (let i = 0; i < cookieArr.length; i++) {
-			let cookie = cookieArr[i].trim();
-			if (cookie.indexOf(name + '=') === 0) {
-				return cookie.substring(name.length + 1, cookie.length);
+			const cookie = cookieArr[i].trim();
+			if (cookie.startsWith(name + '=')) {
+				return cookie.substring(name.length + 1);
 			}
 		}
 		return '';
 	}
 
-	// Call checkFirstVisit when the component is mounted
-	import { onMount } from 'svelte';
-	onMount(() => {
-		checkFirstVisit();
-	});
+	/**
+	 * Set a cookie with a simple expiry window (days).
+	 * Adds SameSite=Lax to reduce CSRF-style cookie abuse.
+	 * NOTE: "Secure" should be used in production on HTTPS.
+	 */
+	function setCookie(name: string, value: string, days: number) {
+		const d = new Date();
+		d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
+		const expires = 'expires=' + d.toUTCString();
 
+		// If you are always HTTPS in prod, add `; Secure`
+		document.cookie = `${name}=${encodeURIComponent(value)}; ${expires}; path=/; SameSite=Lax`;
+	}
+
+	/**
+	 * Check whether this is a first visit (no "visited" cookie).
+	 * If first visit -> show the cookie popup once.
+	 */
+	function checkFirstVisit() {
+		const visited = getCookie('visited');
+		showPopup = !visited;
+	}
+
+	/**
+	 * Close/open the popup.
+	 * (Used for overlay click and close button.)
+	 */
 	function togglePopup() {
 		showPopup = !showPopup;
 	}
+
+	/**
+	 * Accept cookies: store a long-lived flag and close.
+	 */
+	function acceptCookies() {
+		setCookie('visited', 'true', 365);
+		showPopup = false;
+	}
+
+	// Run the first-visit check on client mount (safe: document.cookie exists)
+	onMount(() => {
+		checkFirstVisit();
+	});
 </script>
 
 <Navbar />
 
-<div
-	class="mx-auto max-w-5xl border-x border-gray-400 bg-gradient-to-b from-gray-100 via-white to-gray-200 px-4 py-10 font-mono text-gray-900 shadow-md"
->
-	<!-- Title -->
-	<h1 class="mb-2 text-center text-4xl font-bold text-blue-900">
-		Serca: AI-Powered Media Search Engine
-	</h1>
-	<p class="mb-6 text-center text-gray-700 italic">"We find what the internet forgot"</p>
+<!--
+	Page shell:
+	- max-w-5xl container
+	- rounded-2xl cards
+	- soft border + subtle background
+	- minimal custom CSS (Tailwind-first)
+-->
+<main class="mx-auto w-full max-w-5xl px-4 pb-10 pt-8 font-sans text-gray-900">
+	<!-- Hero / Header -->
+	<section class="rounded-2xl border border-gray-300 bg-blue-50 p-6 shadow-sm">
+		<h1 class="text-center text-4xl font-bold text-blue-900">Serca: AI-Powered Media Search Engine</h1>
+		<p class="mt-2 text-center text-gray-700 italic">"We find what the internet forgot"</p>
+	</section>
 
 	<!-- Table of Contents -->
-	<div class="mb-10 rounded-md border border-yellow-400 bg-yellow-100 p-4 shadow-sm">
+	<section class="mt-6 rounded-2xl border border-yellow-400 bg-yellow-100 p-5 shadow-sm">
 		<h2 class="mb-2 text-xl font-bold text-teal-800">🧭 Table of Contents</h2>
 		<ul class="list-inside list-disc space-y-1 text-blue-700">
 			<li><a href="#what-is-serca" class="hover:underline">What is Serca?</a></li>
 			<li><a href="#how-does-serca" class="hover:underline">How does this service work?</a></li>
 			<li><a href="#how-it-works" class="hover:underline">Under the hood</a></li>
 			<li><a href="#sample-queries" class="hover:underline">Sample Queries</a></li>
-			<li><a href="#api" class="hover:underline">Pricing</a></li>
+			<li><a href="#pricing" class="hover:underline">Pricing</a></li>
 			<li><a href="#highlighted-sites" class="hover:underline">Cool Sites</a></li>
 		</ul>
-	</div>
+	</section>
 
 	<!-- What is Serca -->
-	<section id="what-is-serca" class="mb-12">
-		<h2 class="mb-2 text-2xl font-bold text-purple-800 underline">What is Serca?</h2>
-		<p>
-			Serca is an advanced search engine powered by AI and intelligent web scraping technology. It
-			builds a comprehensive database by gathering URLs and their descriptions, enabling users to
-			search using natural language. This allows for faster, more intuitive, and accurate search
-			results, transforming the way people find information online.
+	<section id="what-is-serca" class="mt-8 rounded-2xl border border-gray-300 bg-white p-6 shadow-sm">
+		<h2 class="mb-2 text-2xl font-bold text-purple-800">What is Serca?</h2>
+		<p class="text-gray-800">
+			Serca is an AI-assisted search engine designed to help you find media and pages that normal search
+			can’t surface easily. It builds a database by gathering URLs and descriptions, and it supports
+			natural-language search so you can describe what you remember instead of guessing the “perfect keywords”.
 		</p>
 	</section>
 
 	<!-- How the Serca service will work -->
-	<section id="how-does-serca" class="mb-12">
-		<h2 class="mb-2 text-2xl font-bold text-purple-800 underline">How does this service work?</h2>
-		<p>
-			We are committed to being as transparent as possible. We will maintain a free version to
-			contribute to the betterment of the internet. Additionally, Serca will offer a paid version
-			with extra features and support. This paid service will be tiered, providing enhanced services
-			and search capabilities. While the internet is an amazing place, and we all love it!! It's not
-			all sunshine and rainbows. Serca will implement a flagging system to mark inappropriate
-			content, which will be inaccessible at the free tier. Paid tiers will have access to this
-			content. Furthermore, all illegal content will be banned and reported to the proper
-			authorities. If you have any questions or concerns, please feel free to <a
-				href="mailto:gmtower1@gmail.com">contact</a
-			> us.
+	<section id="how-does-serca" class="mt-8 rounded-2xl border border-gray-300 bg-white p-6 shadow-sm">
+		<h2 class="mb-2 text-2xl font-bold text-purple-800">How does this service work?</h2>
+
+		<p class="text-gray-800">
+			We’re committed to being transparent. Serca will keep a free tier that’s useful and safe, and a paid
+			tier with extra features and higher query limits to help cover server + database costs.
+		</p>
+
+		<p class="mt-3 text-gray-800">
+			The internet has amazing content… and some content that needs stricter handling. Serca uses a
+			flagging system to control access to sensitive content. The free tier won’t include flagged material,
+			while paid tiers may allow access depending on policy and legality.
+		</p>
+
+		<p class="mt-3 text-gray-800">
+			<strong>Important:</strong> Illegal content is not allowed. If illegal content is discovered, it will be
+			removed and reported to the proper authorities.
+		</p>
+
+		<p class="mt-3 text-gray-800">
+			Questions? Reach out via <a class="text-blue-700 hover:underline" href="mailto:gmtower1@gmail.com">email</a>.
 		</p>
 	</section>
 
-	<!-- How It Works -->
-	<section id="how-it-works" class="mb-12">
-		<h2 class="mb-2 text-2xl font-bold text-purple-800 underline">Under the hood</h2>
-		<ul class="list-inside list-disc text-gray-800">
+	<!-- Under the hood -->
+	<section id="how-it-works" class="mt-8 rounded-2xl border border-gray-300 bg-white p-6 shadow-sm">
+		<h2 class="mb-2 text-2xl font-bold text-purple-800">Under the hood</h2>
+
+		<ul class="list-inside list-disc space-y-2 text-gray-800">
 			<li>
-				<strong>Multimodal AI models</strong> (image, video, and audio[coming soon]) to analyze and process
-				various types of media.
+				<strong>Multimodal AI models</strong> (image, video, and audio—coming soon) to understand different
+				types of media.
 			</li>
 			<li>
-				<strong>Advanced web scraping and discovery</strong> techniques to uncover hidden media across
-				the web.
+				<strong>Web scraping + discovery</strong> to uncover hard-to-find pages and media across the web.
 			</li>
 			<li>
-				<strong>Edge computing</strong> systems to minimize environmental impact by processing data closer
-				to the source.
+				<strong>Edge computing</strong> to process data closer to the source and reduce unnecessary load.
 			</li>
 		</ul>
 	</section>
 
 	<!-- Sample Queries -->
-	<section id="sample-queries" class="mb-12">
-		<h2 class="mb-2 text-2xl font-bold text-purple-800 underline">Sample Queries</h2>
-		<h3>Here are some sample queries to try. Please see search page for specifics.</h3>
-		<div class="border border-gray-300 bg-white p-4 font-mono text-sm text-gray-800 shadow-inner">
-			<pre>
-> "people at the beach"
-> "tv and broadcasts"
-> "animals"
-      </pre>
+	<section id="sample-queries" class="mt-8 rounded-2xl border border-gray-300 bg-white p-6 shadow-sm">
+		<h2 class="mb-2 text-2xl font-bold text-purple-800">Sample Queries</h2>
+		<p class="text-gray-800">Here are a few examples. (See the search page for specifics.)</p>
+
+		<div class="mt-4 rounded-xl border border-gray-200 bg-gray-50 p-4 font-mono text-sm text-gray-800">
+			<pre class="whitespace-pre-wrap">
+> people at the beach
+> tv and broadcasts
+> animals
+			</pre>
 		</div>
 	</section>
 
-	<!-- Serca Pricing -->
-	<section id="pricing" class="mb-12">
-		<h2 class="mb-2 text-2xl font-bold text-purple-800 underline">Serca Pricing</h2>
-		<div class="border border-gray-400 bg-gray-100 p-4 font-mono text-sm">
-			<p>
-				While the Serca-core is open source access to our database and search engine are not
-				completely free. We need to charge small fees to support the servers and database.
+	<!-- Pricing -->
+	<section id="pricing" class="mt-8 rounded-2xl border border-gray-300 bg-white p-6 shadow-sm">
+		<h2 class="mb-2 text-2xl font-bold text-purple-800">Pricing</h2>
+
+		<p class="text-gray-800">
+			While the Serca-core is open source, access to the hosted database and search API can’t be completely free.
+			We charge small fees to support servers, storage, and indexing.
+		</p>
+
+		<div class="mt-4 rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-800">
+			<h3 class="text-base font-bold">Pay-as-you-use</h3>
+			<p class="mt-1">
+				Every new user gets a set number of free queries per month. After that, queries become paid (pricing TBD).
 			</p>
-			<br />
-			<h2><strong>Pay as you use pricing</strong></h2>
-			<p>
-				Every new user will have a set number of queries per month free. After these queries are
-				used up, they will be charged pre query.
-			</p>
-			<br />
-			<h2><strong>What's always free</strong></h2>
-			<p>The keyword searching method will remain free.</p>
+
+			<h3 class="mt-4 text-base font-bold">What’s always free</h3>
+			<p class="mt-1">The basic keyword searching method will remain free.</p>
 		</div>
 	</section>
 
 	<!-- Highlighted Sites -->
-	<section id="highlighted-sites" class="mb-12">
+	<section id="highlighted-sites" class="mt-8 rounded-2xl border border-gray-300 bg-white p-6 shadow-sm">
+		<h2 class="mb-4 text-2xl font-bold text-purple-800">Cool Sites</h2>
 		<HighlightedSites />
 	</section>
 
-	<!-- Final Note -->
-	<p class="mt-8 mb-4 text-center font-serif text-base text-gray-600 italic">Kilroy Was Here!</p>
-</div>
+	<!-- Newsletter -->
+	<section class="mt-8">
+		<Newsletter />
+	</section>
 
-<!-- Newsletter -->
-<Newsletter />
+	<!-- Announcements header -->
+	<section class="mt-10 rounded-2xl border border-gray-300 bg-blue-50 p-5 text-center shadow-sm">
+		<h2 class="text-2xl font-bold text-blue-900">Announcements</h2>
+	</section>
 
-<h1 class="m-4 flex justify-center text-4xl">Announcements</h1>
+	<!-- Announcements list -->
+	<section class="mt-6 space-y-4">
+		<Announcements
+			title="Spanish localization"
+			date="September 15, 2025"
+			type="Development Milestone"
+			content="I have located someone willing to translate the website into Spanish. At some point we will try and do this for more languages."
+		/>
+		<Announcements
+			title="API Development"
+			date="September 15, 2025"
+			type="Development Milestone"
+			content="Between summer and school I haven't been able to work on this as I should be. But in that time I managed to build an AI embedding search engine that I think will work well here. As such I will be implementing it into Serca."
+		/>
+		<Announcements
+			title="Back end and AI updates"
+			date="May 17, 2025"
+			type="Development Milestone"
+			content="It has been a bit since we added anything to announcements. We've been putting a ton of work into building out the backend. The entire AI pipeline and inference has been moved off of the cloud and can now run on a M1 Mac. It's important that we can run Serca on hardware that doesn't cost $10,000. Next is building out the API and search engine."
+		/>
+		<Announcements
+			title="Serca launches into alpha"
+			date="April 23, 2025"
+			type="Development Milestone"
+			content="Today our search engine and database talked for the first time. We are now officially in the alpha phase. There is definitely a ton of room to grow. For the next weeks we will be working on the following features: * Improved AI description * AI assisted search"
+		/>
+		<Announcements
+			title="Abscissa is currently building out this page"
+			date="April 7, 2025"
+			type="Development"
+			content="We are properly in the development trenches now. We will keep you posted."
+		/>
+		<Announcements title="Page creation" date="April 4, 2025" type="Development" content="This page was created" />
+	</section>
 
-<!-- Announcements -->
-<div class="mx-auto mt-6 max-w-5xl px-4">
-	<Announcements
-		title="Spanish localization"
-		date="September 15, 2025"
-		type="Development Milestone"
-		content="I have located someone willing to translate the website into Spanish. At somepoint we will try and do this for more languages."
-	/>
-	<Announcements
-		title="API Development"
-		date="September 15, 2025"
-		type="Development Milestone"
-		content="Between summer and school I haven't been able to work on this as I should be. But in that time I managed to build an AI embedding search engine that I think will work well here.
-		As such I will be implementing it into Serca."
-	/>
-	<Announcements
-		title="Back end and AI updates"
-		date="May 17, 2025"
-		type="Development Milestone"
-		content="It has been a bit since we added anything to announcements. We've been putting a ton of work into building out the backend.
-		The entire AI pipeline and inference has been moved off of the cloud and can now run on a M1 Mac.
-		It's important that we can run Serca on hardware that doesn't cost $10,000. Next is building out the API and search engine."
-	/>
-	<Announcements
-		title="Serca launches into alpha"
-		date="April 23, 2025"
-		type="Development Milestone"
-		content="Today our search engine and database talked for the first time. We are now officially in the alpha phase.
-		There is definatly a ton of room to grow. For the next weeks we will be working on the following features:
-		* Improved AI description
-		* AI assisted search"
-	/>
-	<Announcements
-		title="Abscissa is currently building out this page"
-		date="April 7, 2025"
-		type="Development"
-		content="We are properly in the development trenches now. We will keep you posted."
-	/>
-	<Announcements
-		title="Page creation"
-		date="April 4, 2025"
-		type="Development"
-		content="This page was created"
-	/>
-</div>
+	<!-- Footer / signature line -->
+	<p class="mt-10 text-center font-serif text-base text-gray-600 italic">Kilroy Was Here!</p>
+</main>
 
+<!-- Cookie popup (only on first visit) -->
 {#if showPopup}
+	<!-- Clicking the overlay closes the modal -->
 	<div class="overlay" on:click={togglePopup}></div>
-	<div class="popup">
-		<h2 class="text-2xl">Hello welcome the Serca!</h2>
-		<p>
-			We do use some cookies. We haven't added them to your browser yet. You'll see this popup each
-			time. Oh and we do use cookies for some features.
+
+	<!-- Modal card -->
+	<div class="popup" role="dialog" aria-modal="true" aria-label="Cookie notice">
+		<h2 class="text-xl font-bold text-gray-900">Welcome to Serca</h2>
+		<p class="mt-2 text-sm text-gray-700">
+			We use cookies for basic features and to improve the experience. If you accept, we’ll store a simple “visited”
+			flag so you don’t see this message again.
 		</p>
-		<button class="m-4 border border-gray-300 p-4" on:click={togglePopup}>Close</button>
-		<button
-			class="m-4 border border-gray-300 p-4"
-			on:click={() => {
-				setCookie('visited', 'true', 365);
-				togglePopup();
-			}}>Accept</button
-		>
+
+		<div class="mt-4 flex flex-wrap gap-2">
+			<button class="rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-bold hover:bg-gray-50" on:click={togglePopup}>
+				Close
+			</button>
+
+			<button class="rounded-xl border border-blue-800 bg-blue-100 px-4 py-2 text-sm font-bold text-blue-800 hover:bg-blue-200" on:click={acceptCookies}>
+				Accept
+			</button>
+		</div>
 	</div>
 {/if}
 
-<!-- Footer -->
+<!-- Footer component -->
 <Vudoo />
 
 <style>
-	body {
-		background-color: #d8a6c7; /* Piss Purple Background */
-		font-family: 'Courier New', Courier, monospace;
-		color: #222;
+	/* Keep styling minimal; Tailwind handles most of the look.
+	   Only modal/overlay and page background need custom CSS. */
+
+	:global(body) {
+		background-color: #d8a6c7; /* your current background */
 	}
 
 	a {
 		color: #0044aa;
 	}
-
 	a:hover {
 		color: #000;
 		background-color: #ffe;
 	}
 
-	pre {
-		background-color: #f9f9f9;
-		padding: 0.5rem;
-		overflow-x: auto;
-		font-family: 'Courier New', Courier, monospace;
-	}
-
-	h2 {
-		border-left: 4px solid #ccc;
-		padding-left: 0.5rem;
-	}
-
-	/* Subtle highlight effect */
-	ul li:hover {
-		background-color: #f0f0f0;
-	}
-
 	/* Overlay to dim the background */
 	.overlay {
 		position: fixed;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
+		inset: 0;
 		background: rgba(0, 0, 0, 0.5);
 		z-index: 10;
 	}
 
-	/* The popup container */
+	/* The popup container (modal) */
 	.popup {
 		position: fixed;
 		top: 50%;
 		left: 50%;
 		transform: translate(-50%, -50%);
+		width: min(520px, calc(100% - 2rem));
 		background: white;
 		padding: 20px;
-		border-radius: 8px;
-		box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-		z-index: 20;
-	}
-
-	.overlay {
-		position: fixed;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		background: rgba(0, 0, 0, 0.5);
-		z-index: 10;
-	}
-
-	/* The popup container */
-	.popup {
-		position: fixed;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-		background: white;
-		padding: 20px;
-		border-radius: 8px;
-		box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+		border-radius: 16px;
+		box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
 		z-index: 20;
 	}
 </style>
