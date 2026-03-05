@@ -2,14 +2,14 @@
 	// ---------------------------------------------
 	// Search Page (beta)
 	// - Same “rounded-2xl cards + soft borders + shadow-sm” aesthetic
-	// - Adds UX upgrades:
-	//   • Submit-on-Enter already works via form, but we add a "Clear" button
-	//   • Better error/status messaging styling
+	// - UX upgrades:
+	//   • Clear button
+	//   • Better status banners
 	//   • Disable login + search while requests are in flight
 	//   • Safe JSON parsing (handles non-JSON error bodies)
-	//   • Small security + correctness notes in comments
+	//   • ✅ Sorts returned results by similarity (highest first)
 	//
-	// NOTE: I kept your state-object approach (auth/search/history) to minimize churn.
+	// NOTE: Kept your state-object approach to minimize churn.
 	// ---------------------------------------------
 
 	// Top-level UI components
@@ -224,6 +224,7 @@ ${userprompt}`;
 	// ---------- Search ----------
 	/**
 	 * Executes backend search and writes result into state.
+	 * ✅ Sorts `resolved` by similarity (desc) before rendering.
 	 */
 	async function runSearch(filters: Filters) {
 		search.searching = true;
@@ -238,8 +239,21 @@ ${userprompt}`;
 			return;
 		}
 
-		// ✅ Your API returns: { code, datetime, query, resolved }
-		search.result = r.data;
+		// ✅ Sort by similarity (highest first).
+		// Use a stable-sort pattern (decorate -> sort -> undecorate) so ties keep API order.
+		const original = Array.isArray(r.data.resolved) ? r.data.resolved : [];
+		const resolved = original
+			.map((item, idx) => ({ item, idx }))
+			.sort((a, b) => {
+				const as = a.item.similarity ?? -Infinity;
+				const bs = b.item.similarity ?? -Infinity;
+				if (bs !== as) return bs - as;
+				return a.idx - b.idx; // tie-breaker preserves original order
+			})
+			.map((x) => x.item);
+
+		// ✅ Keep the original response but replace resolved with sorted
+		search.result = { ...r.data, resolved };
 		search.searching = false;
 	}
 
@@ -387,8 +401,10 @@ ${userprompt}`;
 			<section class="rounded-2xl border border-gray-300 bg-blue-50 p-6 shadow-sm">
 				<h1 class="text-xl font-bold text-blue-900">Media Search Interface (beta)</h1>
 				<p class="mt-2 text-sm text-gray-700">
-					Describe what you’re looking for. Results are ranked by similarity.
-				</p>
+					Describe what you’re looking for. Results are ranked by similarity. No need to include "video" or "image" that is implicit.
+					Please also note that the database is currently small and growing, so results may be sparse. The search algorithm is designed to find relevant matches. 
+					Lastly please be mindful that the database may contain mature content, so avoid submitting queries with adult terms or explicit content if you want to steer clear of that.
+					But remember that this is the internet and there may still be surprises and rule 324, 35 exist, so proceed with caution and happy searching!
 			</section>
 
 			<!-- Search form -->
