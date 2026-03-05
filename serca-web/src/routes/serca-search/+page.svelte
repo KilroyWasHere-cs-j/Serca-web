@@ -142,7 +142,7 @@
 	//async function queryDatabase(filters) {
 	async function queryDatabase(extracted_filters: string[]) {
 		let filters = {
-			keywords: ["one piece", "anime", "pirate", "adventure"],
+			keywords: ["music"],
 			mature: false,
 			child: false
 		};
