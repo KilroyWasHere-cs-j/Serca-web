@@ -142,19 +142,20 @@
 	//async function queryDatabase(filters) {
 	async function queryDatabase(extracted_filters: string[]) {
 		let filters = {
-			keywords: ["music"],
+			keywords: [],
 			mature: false,
 			child: false
 		};
 		try {
-			let rawQuery = "music";
-			let base_url = 'https://serca-backend.onrender.com/search?q=';
-			console.log('Base URL:', base_url);
-			let full_url = base_url + rawQuery;
-			console.log('Full URL:', full_url);
-			const response = await fetch(full_url);
-			const data = await response.json();
-			console.log('API Response:', data);
+			console.log('Query running');
+			const res = await fetch('/api/data/search', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ filters })
+			});
+			const data = await res.json();
+			database.database_response = data.results || [];
+			console.log('DB says', database.database_response);
 		} catch (err) {
 			console.error('Failed to query database:', err);
 			database.database_response = [];

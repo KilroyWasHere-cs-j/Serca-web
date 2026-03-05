@@ -5,17 +5,11 @@ import { neon } from '@neondatabase/serverless';
 export async function POST({ request }) {
 	console.log('Got request');
 	try {
-		const body = await request.json();
-		const rawQuery = typeof body.query === 'string' ? body.query.trim() : null;
-		console.log('Raw query:', rawQuery);
 
-		if (!rawQuery || rawQuery.length > 200) {
-			return new Response('Invalid or missing query', { status: 400 });
-		}
-
+		let rawQuery = 'music';
 		let base_url = 'https://serca-backend.onrender.com/search?q=';
 		console.log('Base URL:', base_url);
-		let full_url = base_url + encodeURIComponent(rawQuery);
+		let full_url = base_url + rawQuery;
 		console.log('Full URL:', full_url);
 		const response = await fetch(full_url);
 		const data = await response.json();
