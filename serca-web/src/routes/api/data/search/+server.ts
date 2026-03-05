@@ -15,10 +15,12 @@ export async function POST({ request }) {
 		}
 
 		let base_url = 'https://serca-backend.onrender.com/search?q=';
+		console.log('Base URL:', base_url);
 		let full_url = base_url + encodeURIComponent(rawQuery);
+		console.log('Full URL:', full_url);
 		const response = await fetch(full_url);
 		const data = await response.json();
-
+		console.log('API Response:', data);
 
 
 		return json({ results: data || [], error: null });
