@@ -5,6 +5,7 @@
 <script lang="ts">
 	import Navbar from '../../components/Navbar.svelte';
 	import * as CryptoJS from 'crypto-js';
+	import SearchResults from "./SearchResults.svelte";
 
 	let states = {
 		// Initialize state properties here
@@ -325,7 +326,6 @@
 		<hr class="my-4 border-t border-black" />
 
 		<h2 class="mb-2 text-xl font-bold">Results:</h2>
-		<p>{database.database_response}</p>
 
 		<hr class="my-4 border-t border-black" />
 
