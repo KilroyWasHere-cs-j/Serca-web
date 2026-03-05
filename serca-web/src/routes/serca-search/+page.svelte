@@ -162,6 +162,7 @@
 		}
 	}
 
+	// This function validates the user's credentials by sending their email and encrypted key to the server. If the server confirms the credentials are valid, it unlocks the search functionality.
 	async function validateUser() {
 		console.log('Attempting to validate user');
 		try {
@@ -201,9 +202,9 @@
 		still refining the search function. We will email when everything is workable.
 	</p>
 </div>
+<!-- Warning -->
 
-<!-- Serca is still being developed. So please bare with whilst we try and get this tool working -->
-
+<!-- Limit Hit -->
 {#if states.limitHit}
 	<div class="m-4 border border-gray-400 bg-red-300 p-4">
 		<h1>Hey you ran out of queries!!</h1>
@@ -213,14 +214,18 @@
 		</p>
 	</div>
 {/if}
+<!-- Limit Hit -->
 
+<!-- Bad User -->
 {#if states.baduser}
 	<div class="m-4 border border-gray-500 bg-red-600 p-4">
 		<h1>Login failed</h1>
 		<p>Something isn't right about the credentials you gave us</p>
 	</div>
 {/if}
+<!-- Bad User -->
 
+<!-- Login Form -->
 {#if !states.unlocked}
 	<div class="m-4 bg-green-300 p-10">
 		<h1>Login</h1>
@@ -248,7 +253,9 @@
 		</button>
 	</div>
 {/if}
+<!-- Login Form -->
 
+<!-- Search Interface Unlocked-->
 {#if states.unlocked}
 	<button
 		class="mt-3 cursor-pointer border border-blue-800 bg-blue-100 px-4 py-1 text-sm font-bold text-blue-800"
@@ -285,7 +292,6 @@
 		</ul>
 	</div>
 
-	<!-- Form -->
 	<div class="mx-auto w-full max-w-4xl px-4 text-left font-sans">
 		<h1 class="mb-4 text-2xl font-bold">Media Search Interface (beta)</h1>
 
@@ -315,38 +321,11 @@
 		<hr class="my-4 border-t border-black" />
 
 		<h2 class="mb-2 text-xl font-bold">Serca Says:</h2>
-		<div
-			class="border border-gray-500 bg-[#f0fff0] p-2 font-mono text-sm whitespace-pre-wrap text-black"
-		>
-			{ai.groqThoughts}
-		</div>
 
 		<hr class="my-4 border-t border-black" />
 
 		<h2 class="mb-2 text-xl font-bold">Results:</h2>
-		<ul class="list-disc pl-5 text-sm text-gray-900">
-			{#each database.database_response as row}
-				<li className="result-item">
-					<div className="url">
-						<h1>🔗 <a href={row.url} target="_blank" rel="noopener noreferrer">{row.url}</a></h1>
-					</div>
-
-					<div className="meta">
-						<h2>📝 Meta Data</h2>
-						<p>{row.meta_data}</p>
-					</div>
-
-					<div className="flags">
-						<h3>🚩 Flags</h3>
-						<ul>
-							<li>{row.mature ? '🔞 Mature Content' : '✅ Not Mature'}</li>
-							<li>{row.child ? '🚫 Does Not Include Children' : '🧒 Includes Children'}</li>
-						</ul>
-					</div>
-					x
-				</li>
-			{/each}
-		</ul>
+		<p>{database.database_response}</p>
 
 		<hr class="my-4 border-t border-black" />
 
@@ -360,3 +339,4 @@
 		</div>
 	</div>
 {/if}
+<!-- Search Interface -->

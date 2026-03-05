@@ -1,6 +1,5 @@
 import { json } from '@sveltejs/kit';
 import 'dotenv/config';
-import { neon } from '@neondatabase/serverless';
 
 export async function POST({ request }) {
 	console.log('Got request');
@@ -13,7 +12,6 @@ export async function POST({ request }) {
 		console.log('Full URL:', full_url);
 		const response = await fetch(full_url);
 		const data = await response.json();
-		console.log('API Response:', data);
 
 
 		return json({ results: data || [], error: null });
