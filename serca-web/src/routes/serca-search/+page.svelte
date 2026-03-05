@@ -5,7 +5,7 @@
 <script lang="ts">
 	import Navbar from '../../components/Navbar.svelte';
 	import * as CryptoJS from 'crypto-js';
-	import SearchResults from "./SearchResults.svelte";
+	import SearchResults from "../../components/SearchResults.svelte";
 
 	let states = {
 		// Initialize state properties here
