@@ -1,342 +1,316 @@
-<!-- Future Gabe this code is shit please refactor -->
-<!-- TODO
- - Process search terms into filters
- - Process query responce in to visual results -->
 <script lang="ts">
-	import Navbar from '../../components/Navbar.svelte';
-	import * as CryptoJS from 'crypto-js';
-	import SearchResults from "../../components/SearchResults.svelte";
+  import Navbar from '../../components/Navbar.svelte';
+  import SearchResults from '../../components/SearchResults.svelte';
+  import * as CryptoJS from 'crypto-js';
 
-	let states = {
-		// Initialize state properties here
-		unlocked: true,
-		baduser: false,
-		limitHit: false,
-		showResults: false,
-		searching: false
-	};
+  // ---------- Types ----------
+  type SearchItem = {
+    id: number | string;
+    name?: string;
+    body?: string;
+    link?: string;
+    similarity?: number;
+    [k: string]: any;
+  };
 
-	let user = {
-		// Initialize user properties here
-		email: '',
-		key: ''
-	};
+  type SearchResponse = {
+    datetime?: string;
+    code?: string;
+    query?: string;
+    resolved?: SearchItem[];
+    [k: string]: any;
+  };
 
-	let history = {
-		// Initialize history properties here
-		past_queries: [],
-		chat_history: ''
-	};
+  type Filters = {
+    keywords: string[];
+    mature: boolean;
+    child: boolean;
+  };
 
-	let ai = {
-		// Initialize AI properties here
-		groqThoughts: '',
-		groqInternalThoughts: ''
-	};
+  // ---------- State ----------
+  const auth = {
+    unlocked: true,
+    baduser: false,
+    limitHit: false,
+    email: '',
+    key: ''
+  };
 
-	let database = {
-		// Initialize database properties here
-		query: '',
-		database_response: [],
-		data_table_schema: `Table: urls
-- url: string
-- meta_data: string
-- mature: boolean
-- child: boolean
-- flag: string`
-	};
+  const history = {
+    past_queries: [] as string[],
+    chat_history: ''
+  };
 
-	function encryptKey(key: string) {
-		let hash = CryptoJS.SHA256(key);
-		return hash.toString();
-	}
+  const ai = {
+    lastReply: '',
+    groqThoughts: '',
+    groqInternalThoughts: ''
+  };
 
-	async function logSearch(search: String) {
-		console.log('Logging search: ', search);
-		const res = await fetch('/api/data/logsearch', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({ search })
-		});
-	}
-	
-	// This function is called every time a user makes a search. It increments the user's query count and checks if they've hit their limit.
-	async function increaseUserCount() {
-		let lemail = user.email;
-		const res = await fetch('/api/data/setuserqcount', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({ lemail })
-		});
+  const search = {
+    query: '',
+    searching: false,
+    error: '' as string | '',
+    result: null as SearchResponse | null
+  };
 
-		if (res.status === 403) {
-			const { error } = await res.json();
-			console.warn('Limit hit:', error);
-			states.unlocked = false;
-			states.limitHit = true;
-			// Handle limit reached — show a message, disable a button, etc.
-		} else if (!res.ok) {
-			const { error } = await res.json();
-			console.error('Server error:', error);
-		} else {
-			const data = await res.json();
-			console.log('Query succeeded:', data);
-		}
-	}
+  // ---------- Helpers ----------
+  function encryptKey(key: string) {
+    return CryptoJS.SHA256(key).toString();
+  }
 
-	// This function sends the user's prompt to the AI and processes the response. If the response includes a "SET" command, it extracts the filters and queries the database.
-	async function sendPrompt(userprompt: string) {
-		const prompt = `You are **Serca**, an AI-powered media search assistant.
-		Select the top 5 best matches that relate to the user's query. Suggest terms to enhance a users query
+  function normalizeKeywords(q: string): string[] {
+    return q
+      .trim()
+      .split(/\s+/g)
+      .map((s) => s.toLowerCase())
+      .filter(Boolean);
+  }
 
-		Chat history:
-		${history.chat_history}
+  async function apiPost<T>(url: string, body: any): Promise<{ ok: boolean; status: number; data: T | null; error?: string }> {
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
 
-		User asks:
-		${userprompt}`;
+      const text = await res.text();
+      const parsed = text ? JSON.parse(text) : null;
 
-		const res = await fetch('/api/data/aisearch', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ prompt })
-		});
+      if (!res.ok) {
+        return { ok: false, status: res.status, data: parsed, error: parsed?.error || `Request failed (${res.status})` };
+      }
 
-		const data = await res.json();
-		let response = data.response;
+      return { ok: true, status: res.status, data: parsed };
+    } catch (e: any) {
+      return { ok: false, status: 0, data: null, error: e?.message || 'Network error' };
+    }
+  }
 
-		history.chat_history += `User said: ${userprompt}\n You said: ${response}\n`;
-		logSearch(userprompt);
-		increaseUserCount();
+  async function logSearch(q: string) {
+    if (!q) return;
+    await apiPost('/api/data/logsearch', { search: q });
+  }
 
-		if (response.includes('SET')) {
-			console.log('SET passed');
+  async function increaseUserCount() {
+    const lemail = auth.email;
+    const r = await apiPost<any>('/api/data/setuserqcount', { lemail });
 
-			// Keep only the JSON block up to and including the first closing curly brace
-			const trimmed = response.replace(/}(?=[^}]*$)[\s\S]*/, '}');
+    if (!r.ok && r.status === 403) {
+      auth.unlocked = false;
+      auth.limitHit = true;
+      return;
+    }
 
-			try {
-				const filters = JSON.parse(trimmed.match(/{[\s\S]*?}/)[0]);
-				console.log(await queryDatabase(filters));
-				return '';
-			} catch (e) {
-				console.error('Failed to parse JSON:', e);
-				return response;
-			}
-		}
-		return response;
-	}
+    if (!r.ok) {
+      console.error('setuserqcount error:', r.error);
+    }
+  }
 
-	// This function is called when the user submits a search. It sends the prompt to the AI and, if the AI responds with filters, it queries the database.
-	async function handleSearch() {
-		console.log('Handling Search');
-		//sendPrompt('woman swimming');
+  // ---------- AI (optional path, not used in simple handleSearch) ----------
+  async function sendPrompt(userprompt: string) {
+    const prompt = `You are **Serca**, an AI-powered media search assistant.
+Select the top 5 best matches that relate to the user's query. Suggest terms to enhance a users query
 
-		if (!database.query || states.searching) return;
-		let filters = database.query.split(' ');
-		queryDatabase(filters);
-	}
+Chat history:
+${history.chat_history}
 
-	//async function queryDatabase(filters) {
-	async function queryDatabase(extracted_filters: string[]) {
-		let filters = {
-			keywords: [],
-			mature: false,
-			child: false
-		};
-		try {
-			console.log('Query running');
-			const res = await fetch('/api/data/search', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ filters })
-			});
-			const data = await res.json();
-			database.database_response = data.results || [];
-			console.log('DB says', database.database_response);
-		} catch (err) {
-			console.error('Failed to query database:', err);
-			database.database_response = [];
-		}
-	}
+User asks:
+${userprompt}`;
 
-	// This function validates the user's credentials by sending their email and encrypted key to the server. If the server confirms the credentials are valid, it unlocks the search functionality.
-	async function validateUser() {
-		console.log('Attempting to validate user');
-		try {
-			let ekey = encryptKey(user.key);
-			let lemail = user.email;
-			const res = await fetch('/api/data/signin', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ lemail, ekey })
-			});
+    const r = await apiPost<{ response: string }>('/api/data/aisearch', { prompt });
+    if (!r.ok || !r.data) {
+      return r.error || 'AI request failed';
+    }
 
-			const data = await res.json();
-			if (res.ok && data.validuser) {
-				states.unlocked = true;
-				states.baduser = false;
-				console.log('User validated successfully!');
-				return 'User validated successfully!';
-			} else {
-				states.unlocked = false;
-				states.baduser = true;
-				console.log(data.error || 'Validation failed.');
-				return data.error || 'Validation failed.';
-			}
-		} catch (err) {
-			console.error('err', err);
-			return 'Network or server error.';
-		}
-	}
+    const response = r.data.response ?? '';
+    history.chat_history += `User said: ${userprompt}\nYou said: ${response}\n`;
+    ai.lastReply = response;
+
+    // If your AI returns JSON filters with "SET", parse them here safely
+    if (response.includes('SET')) {
+      const jsonMatch = response.match(/{[\s\S]*}/);
+      if (jsonMatch) {
+        try {
+          const parsed = JSON.parse(jsonMatch[0]);
+          return parsed; // could be filters object
+        } catch (e) {
+          console.warn('AI JSON parse failed:', e);
+        }
+      }
+    }
+
+    return response;
+  }
+
+  // ---------- Search ----------
+  async function runSearch(filters: Filters) {
+    search.searching = true;
+    search.error = '';
+    search.result = null;
+
+    const r = await apiPost<SearchResponse>('/api/data/search', { filters });
+
+    if (!r.ok || !r.data) {
+      search.error = r.error || 'Search failed';
+      search.searching = false;
+      return;
+    }
+
+    // ✅ IMPORTANT: your API returns "resolved"
+    search.result = r.data;
+    search.searching = false;
+  }
+
+  async function handleSearch() {
+    if (!search.query.trim() || search.searching) return;
+
+    const q = search.query.trim();
+    history.past_queries = [q, ...history.past_queries].slice(0, 25);
+
+    const filters: Filters = {
+      keywords: normalizeKeywords(q),
+      mature: false,
+      child: false
+    };
+
+    // if you want AI-assisted filters later, do it here:
+    // const aiFilters = await sendPrompt(q);
+    // if (typeof aiFilters === 'object' && aiFilters?.keywords) filters.keywords = aiFilters.keywords;
+
+    await runSearch(filters);
+    await logSearch(q);
+    await increaseUserCount();
+  }
+
+  // ---------- Auth ----------
+  async function validateUser() {
+    const ekey = encryptKey(auth.key);
+    const lemail = auth.email;
+
+    const r = await apiPost<{ validuser: boolean; error?: string }>('/api/data/signin', { lemail, ekey });
+
+    if (r.ok && r.data?.validuser) {
+      auth.unlocked = true;
+      auth.baduser = false;
+      return;
+    }
+
+    auth.unlocked = false;
+    auth.baduser = true;
+  }
 </script>
 
 <Navbar />
 
 <!-- Warning -->
 <div class="m-4 border border-gray-400 bg-[#ffffe0] px-4 py-3 text-sm text-black">
-	<p>
-		<b>NOTE:</b> This isn't going to work yet... It's not currently connected to a the database. We're
-		still refining the search function. We will email when everything is workable.
-	</p>
+  <p>
+    <b>NOTE:</b> This isn't going to work yet... It's not currently connected to a the database. We're
+    still refining the search function. We will email when everything is workable.
+  </p>
 </div>
-<!-- Warning -->
 
-<!-- Limit Hit -->
-{#if states.limitHit}
-	<div class="m-4 border border-gray-400 bg-red-300 p-4">
-		<h1>Hey you ran out of queries!!</h1>
-		<p>
-			This isn't the end of the line you can pay for more... Although that isn't currently
-			supported. It'll be reset next month.
-		</p>
-	</div>
+{#if auth.limitHit}
+  <div class="m-4 border border-gray-400 bg-red-300 p-4">
+    <h1 class="text-lg font-bold">Hey you ran out of queries!!</h1>
+    <p>
+      This isn't the end of the line you can pay for more... Although that isn't currently supported.
+      It'll be reset next month.
+    </p>
+  </div>
 {/if}
-<!-- Limit Hit -->
 
-<!-- Bad User -->
-{#if states.baduser}
-	<div class="m-4 border border-gray-500 bg-red-600 p-4">
-		<h1>Login failed</h1>
-		<p>Something isn't right about the credentials you gave us</p>
-	</div>
+{#if auth.baduser}
+  <div class="m-4 border border-gray-500 bg-red-600 p-4 text-white">
+    <h1 class="text-lg font-bold">Login failed</h1>
+    <p>Something isn't right about the credentials you gave us</p>
+  </div>
 {/if}
-<!-- Bad User -->
 
-<!-- Login Form -->
-{#if !states.unlocked}
-	<div class="m-4 bg-green-300 p-10">
-		<h1>Login</h1>
-		<label for="email" class="mb-1 block text-base font-bold">Email:</label>
-		<input
-			bind:value={user.email}
-			type="text"
-			id="email"
-			class="w-full border border-black bg-white px-2 py-1 font-mono text-sm text-black"
-		/>
+{#if !auth.unlocked}
+  <div class="m-4 rounded-2xl bg-green-300 p-10">
+    <h1 class="text-xl font-bold">Login</h1>
 
-		<label for="key" class="mb-1 block text-base font-bold">Key:</label>
-		<input
-			bind:value={user.key}
-			type="text"
-			id="key"
-			class="w-full border border-black bg-white px-2 py-1 font-mono text-sm text-black"
-		/>
+    <label for="email" class="mb-1 mt-4 block text-base font-bold">Email:</label>
+    <input
+      bind:value={auth.email}
+      type="text"
+      id="email"
+      class="w-full rounded-lg border border-black bg-white px-2 py-2 font-mono text-sm text-black"
+    />
 
-		<button
-			class="mt-3 cursor-pointer border border-blue-800 bg-blue-100 px-4 py-1 text-sm font-bold text-blue-800"
-			on:click={validateUser}
-		>
-			Login
-		</button>
-	</div>
+    <label for="key" class="mb-1 mt-4 block text-base font-bold">Key:</label>
+    <input
+      bind:value={auth.key}
+      type="password"
+      id="key"
+      class="w-full rounded-lg border border-black bg-white px-2 py-2 font-mono text-sm text-black"
+    />
+
+    <button
+      class="mt-4 rounded-xl border border-blue-800 bg-blue-100 px-4 py-2 text-sm font-bold text-blue-800 hover:bg-blue-200"
+      on:click={validateUser}
+    >
+      Login
+    </button>
+  </div>
 {/if}
-<!-- Login Form -->
 
-<!-- Search Interface Unlocked-->
-{#if states.unlocked}
-	<button
-		class="mt-3 cursor-pointer border border-blue-800 bg-blue-100 px-4 py-1 text-sm font-bold text-blue-800"
-		on:click={handleSearch}
-	>
-		Force Search
-	</button>
-	<div class="mb-4 w-full border border-gray-400 bg-blue-300 p-4">
-		<h1><b>NOTES:</b></h1>
-		<br />
-		<p>
-			Serca search engine is an AI chatbot firstly and a search engine second. This is a strength
-			and a weakness at the same time. Below are some notes to keep in mind when using this service.
-		</p>
-		<ul>
-			<br />
-			<li>
-				- Be as clear as possible, the less conversational you are the easier time Serca will have
-				processing your requests.
-			</li>
-			<br />
-			<li>
-				- Serca can lock up and run into issues where it continually attempts to prompt users for
-				context and never runs a search. In these cases you will likely need to directly override
-				the model. There are a couple methods to do this, but often saying "that's all I know" or
-				"trigger search" is enough to start a search. If the issue continues please report the
-				issue. And we will take a look.
-			</li>
-			<br />
-			<li>
-				- Serca will often ask you to note if the content is mature/adult in nature. Even if the
-				content is seemingly unrelated to mature/adult themes. Why is this needed? See rule 34.
-			</li>
-		</ul>
-	</div>
+{#if auth.unlocked}
+  <div class="mx-auto w-full max-w-4xl px-4 pb-16 text-left font-sans">
+    <div class="mb-4 rounded-2xl border border-gray-300 bg-blue-50 p-4">
+      <h1 class="text-lg font-bold">Media Search Interface (beta)</h1>
+      <p class="mt-2 text-sm text-gray-700">
+        Describe what you’re looking for. Results are ranked by similarity.
+      </p>
+    </div>
 
-	<div class="mx-auto w-full max-w-4xl px-4 text-left font-sans">
-		<h1 class="mb-4 text-2xl font-bold">Media Search Interface (beta)</h1>
+    <form on:submit|preventDefault={handleSearch} class="rounded-2xl border bg-white p-4 shadow-sm">
+      <label for="query" class="mb-2 block text-base font-bold">Describe your media:</label>
 
-		<form on:submit|preventDefault={handleSearch}>
-			<label for="query" class="mb-1 block text-base font-bold">Describe your media:</label>
-			<input
-				bind:value={database.query}
-				type="text"
-				id="query"
-				class="w-full border border-black bg-white px-2 py-1 font-mono text-sm text-black"
-			/>
+      <div class="flex gap-2">
+        <input
+          bind:value={search.query}
+          type="text"
+          id="query"
+          placeholder="e.g. music video in black and white, 90s alt rock…"
+          class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 font-mono text-sm text-black focus:outline-none focus:ring"
+        />
 
-			{#if states.searching}
-				<p class="mt-2 text-green-700">Searching the database...</p>
-			{:else}
-				<p class="mt-2 text-gray-600">Ready to search.</p>
-			{/if}
+        <button
+          type="submit"
+          disabled={search.searching}
+          class="shrink-0 rounded-xl border border-blue-800 bg-blue-100 px-4 py-2 text-sm font-bold text-blue-800 hover:bg-blue-200 disabled:opacity-50"
+        >
+          {#if search.searching}Searching…{:else}Search{/if}
+        </button>
+      </div>
 
-			<button
-				type="submit"
-				class="mt-3 cursor-pointer border border-blue-800 bg-blue-100 px-4 py-1 text-sm font-bold text-blue-800"
-			>
-				Submit
-			</button>
-		</form>
+      {#if search.error}
+        <p class="mt-3 text-sm text-red-700">{search.error}</p>
+      {:else if search.searching}
+        <p class="mt-3 text-sm text-green-700">Searching the database…</p>
+      {:else}
+        <p class="mt-3 text-sm text-gray-600">Ready.</p>
+      {/if}
+    </form>
 
-		<hr class="my-4 border-t border-black" />
+    <div class="mt-6">
+      <h2 class="mb-2 text-xl font-bold">Results</h2>
 
-		<h2 class="mb-2 text-xl font-bold">Serca Says:</h2>
+      <!-- ✅ Renders the real return shape: { code, datetime, query, resolved } -->
+      <SearchResults db={search.result} />
+    </div>
 
-		<hr class="my-4 border-t border-black" />
-
-		<h2 class="mb-2 text-xl font-bold">Results:</h2>
-
-		<hr class="my-4 border-t border-black" />
-
-		<div class="text-xs text-gray-600">
-			<p><b>Past Queries:</b></p>
-			<ul class="ml-5 list-disc">
-				{#each history.past_queries as item}
-					<li>{item}</li>
-				{/each}
-			</ul>
-		</div>
-	</div>
+    <div class="mt-8 rounded-2xl border bg-white p-4 text-xs text-gray-600 shadow-sm">
+      <p class="font-bold">Past Queries</p>
+      <ul class="ml-5 mt-2 list-disc">
+        {#each history.past_queries as item}
+          <li>{item}</li>
+        {/each}
+      </ul>
+    </div>
+  </div>
 {/if}
-<!-- Search Interface -->
