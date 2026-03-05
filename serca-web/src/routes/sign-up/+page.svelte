@@ -1,186 +1,194 @@
-<script>
+<script lang="ts">
+	// ---------------------------------------------
+	// Signup Page
+	// - Matches your newer aesthetic (cards, rounded-2xl, soft borders/shadows)
+	// - Tailwind-first (no heavy custom CSS)
+	// - Better UX:
+	//   • disables submit while sending
+	//   • safe JSON parsing
+	//   • clear success/error banners
+	//   • basic client validation + trimming
+	// - Keeps your existing API contract: POST /api/data/submit { username, email, ekey }
+	//
+	// NOTE: hashing on the client is obfuscation, not real password security.
+	// ---------------------------------------------
+
 	import Navbar from '../../components/Navbar.svelte';
 	import * as CryptoJS from 'crypto-js';
 
-	let username = 'WEB';
-	let email = '';
-	let key = '';
-	let success = false;
-	let showSuccess = false;
+	// -------- Form state --------
+	let username: string = 'WEB';
+	let email: string = '';
+	let key: string = '';
 
-	async function handleSubmit() {
-		console.log('📨 Submitting form data...');
-		let result = await createUser();
+	// -------- UI state --------
+	let submitting = false;
+
+	let showStatus = false;
+	let statusKind: 'success' | 'error' | '' = '';
+	let statusMessage = '';
+
+	/**
+	 * Hash the key so the raw key isn't transmitted.
+	 * NOTE: This is not secure auth by itself.
+	 */
+	function encryptKey(rawKey: string): string {
+		return CryptoJS.SHA256(rawKey).toString();
 	}
 
-	async function createUser() {
-		console.log('🔐 Encrypting key...');
-		let ekey = encryptKey(key);
-		console.log('ekey:', ekey);
-
-		const res = await fetch('/api/data/submit', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({ username, email, ekey })
-		});
-
-		const data = await res.json();
-
-		if (res.ok) {
-			console.log('✅ Signup successful');
-			success = true;
-			showSuccess = true;
-		} else {
-			console.error('❌ Signup failed:', data.message);
-			success = false;
-			showSuccess = true;
+	/**
+	 * Safe JSON parse so we don't explode if the server returns HTML/text on errors.
+	 */
+	function safeJsonParse(text: string) {
+		if (!text) return null;
+		try {
+			return JSON.parse(text);
+		} catch {
+			return null;
 		}
 	}
 
-	function encryptKey(key) {
-		let hash = CryptoJS.SHA256(key);
-		return hash.toString();
+	/**
+	 * Submits the form to create a user.
+	 */
+	async function handleSubmit() {
+		if (submitting) return;
+
+		// Reset banner
+		showStatus = false;
+		statusKind = '';
+		statusMessage = '';
+
+		const lemail = email.trim();
+		const lkey = key.trim();
+
+		// Basic required checks (HTML required already does most of this)
+		if (!lemail || !lkey) {
+			showStatus = true;
+			statusKind = 'error';
+			statusMessage = 'Please fill in all required fields.';
+			return;
+		}
+
+		submitting = true;
+
+		try {
+			// Build payload
+			const ekey = encryptKey(lkey);
+
+			const res = await fetch('/api/data/submit', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ username, email: lemail, ekey })
+			});
+
+			const text = await res.text();
+			const data = safeJsonParse(text);
+
+			if (!res.ok) {
+				// Your backend seems to return data.message sometimes; also support data.error
+				const msg = data?.message || data?.error || `Signup failed (${res.status})`;
+				showStatus = true;
+				statusKind = 'error';
+				statusMessage = msg;
+				return;
+			}
+
+			// Success
+			showStatus = true;
+			statusKind = 'success';
+			statusMessage = 'Signup successful! You can now use the service.';
+
+			// Reset form fields
+			email = '';
+			key = '';
+		} catch (err) {
+			console.error('Signup error:', err);
+			showStatus = true;
+			statusKind = 'error';
+			statusMessage = 'Could not submit signup. Please try again later.';
+		} finally {
+			submitting = false;
+		}
 	}
 </script>
 
 <Navbar />
 
-<div class="notice">
-	<h1>📋 To use the service, please sign up below.</h1>
-</div>
+<main class="min-h-screen w-full bg-gray-100 px-4 py-10 font-sans text-gray-900">
+	<div class="mx-auto w-full max-w-2xl">
+		<!-- Header card -->
+		<section class="rounded-2xl border border-gray-300 bg-blue-50 p-6 text-center shadow-sm">
+			<h1 class="text-3xl font-bold text-blue-900">Signup</h1>
+			<p class="mt-2 text-sm text-gray-700">
+				To use the service, create an account below. We use your email to contact you about access and updates.
+			</p>
+		</section>
 
-{#if success && showSuccess}
-	<div class="banner success">
-		<h1>✅ Signup Successful!!</h1>
+		<!-- Status banner -->
+		{#if showStatus}
+			<div
+				class="mt-4 rounded-2xl border p-4 text-sm shadow-sm"
+				class:border-green-300={statusKind === 'success'}
+				class:bg-green-50={statusKind === 'success'}
+				class:text-green-900={statusKind === 'success'}
+				class:border-red-300={statusKind === 'error'}
+				class:bg-red-50={statusKind === 'error'}
+				class:text-red-900={statusKind === 'error'}
+			>
+				{statusMessage}
+			</div>
+		{/if}
+
+		<!-- Form card -->
+		<section class="mt-6 rounded-2xl border border-gray-300 bg-white p-6 shadow-sm">
+			<form on:submit|preventDefault={handleSubmit} class="space-y-4">
+				<!-- Email -->
+				<div>
+					<label for="email" class="mb-1 block text-sm font-bold text-gray-900">
+						Email <span class="text-red-700">*</span>
+					</label>
+					<input
+						id="email"
+						type="email"
+						bind:value={email}
+						required
+						placeholder="you@example.com"
+						class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 font-mono text-sm text-black focus:outline-none focus:ring"
+					/>
+					<p class="mt-1 text-xs text-gray-500">No temp emails please. We use this to contact you.</p>
+				</div>
+
+				<!-- Key / Password -->
+				<div>
+					<label for="key" class="mb-1 block text-sm font-bold text-gray-900">
+						Password Key <span class="text-red-700">*</span>
+					</label>
+					<input
+						id="key"
+						type="password"
+						bind:value={key}
+						required
+						placeholder="••••••••"
+						class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 font-mono text-sm text-black focus:outline-none focus:ring"
+					/>
+					<p class="mt-1 text-xs text-gray-500">This is like your password. Keep it safe.</p>
+				</div>
+
+				<!-- Submit -->
+				<button
+					type="submit"
+					disabled={submitting}
+					class="w-full rounded-xl border border-blue-800 bg-blue-100 px-4 py-2 text-sm font-bold text-blue-800 hover:bg-blue-200 disabled:cursor-not-allowed disabled:opacity-50"
+				>
+					{#if submitting}Submitting…{:else}Submit{/if}
+				</button>
+
+				<!-- Tiny note -->
+				<p class="text-center text-xs text-gray-500">
+					By signing up, you agree not to use Serca for illegal activity.
+				</p>
+			</form>
+		</section>
 	</div>
-{/if}
-
-{#if !success && showSuccess}
-	<div class="banner fail">
-		<h1>⚠️ Signup Failed. Please try again.</h1>
-	</div>
-{/if}
-
-<div class="page-wrapper">
-	<form on:submit|preventDefault={handleSubmit} class="signup-form">
-		<h2>Signup</h2>
-
-		<label for="email">📧 Email:</label>
-		<input type="email" id="email" bind:value={email} required />
-
-		<p class="note">No temp emails please. We use this to contact you.</p>
-
-		<label for="key">🔑 Password Key:</label>
-		<input type="password" id="key" bind:value={key} required />
-
-		<p class="note">This is like your password. Keep it safe.</p>
-
-		<button type="submit">Submit 📨</button>
-	</form>
-</div>
-
-<style>
-	body {
-		background-color: #f2f2f2;
-		color: #222;
-		font-family: 'Helvetica', 'Arial', sans-serif;
-		margin: 0;
-	}
-
-	.notice {
-		margin: 2rem auto;
-		max-width: 800px;
-		background-color: #fefefe;
-		border: 1px solid #ccc;
-		padding: 20px;
-		text-align: center;
-		font-size: 18px;
-	}
-
-	.page-wrapper {
-		display: flex;
-		justify-content: center;
-		padding: 60px 20px;
-		background-color: #e6e6e6;
-		min-height: 100vh;
-	}
-
-	.signup-form {
-		width: 400px;
-		padding: 30px;
-		background-color: #ffffff;
-		border: 2px solid #999;
-		box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.1);
-	}
-
-	h2 {
-		text-align: center;
-		font-size: 24px;
-		margin-bottom: 20px;
-		border-bottom: 1px solid #ccc;
-		padding-bottom: 10px;
-	}
-
-	label {
-		display: block;
-		margin-top: 20px;
-		font-weight: bold;
-		font-size: 16px;
-	}
-
-	input {
-		width: 100%;
-		padding: 10px;
-		border: 1px solid #aaa;
-		font-size: 16px;
-		background-color: #fafafa;
-		margin-top: 5px;
-	}
-
-	.note {
-		font-size: 14px;
-		color: #555;
-		margin-top: 6px;
-	}
-
-	button {
-		width: 100%;
-		padding: 12px;
-		background-color: #444;
-		color: #fff;
-		border: none;
-		font-size: 16px;
-		margin-top: 25px;
-		font-weight: bold;
-	}
-
-	button:hover {
-		background-color: #000;
-		cursor: pointer;
-	}
-
-	.banner {
-		margin: 20px auto;
-		padding: 16px;
-		text-align: center;
-		font-size: 18px;
-		font-weight: bold;
-		width: 90%;
-		max-width: 600px;
-		border: 1px solid;
-	}
-
-	.success {
-		background-color: #e0ffe0;
-		color: #006400;
-		border-color: #006400;
-	}
-
-	.fail {
-		background-color: #ffe0e0;
-		color: #8b0000;
-		border-color: #8b0000;
-	}
-</style>
+</main>
