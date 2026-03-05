@@ -14,20 +14,14 @@ export async function POST({ request }) {
 			return new Response('Invalid or missing query', { status: 400 });
 		}
 
-		const keywords = Array.isArray(body.query)
-			? body.query.map((q) => q.toLowerCase().trim()).filter(Boolean)
-			: typeof body.query === 'string'
-				? body.query.toLowerCase().split(/\s+/).filter(Boolean)
-				: [];
+		let base_url = 'https://serca-backend.onrender.com/search?q=';
+		let full_url = base_url + encodeURIComponent(rawQuery);
+		const response = await fetch(full_url);
+		const data = await response.json();
 
-		const conditions = keywords.map((kw) => sql`meta_data ILIKE ${`%${kw}%`}`);
-		const whereClause = conditions.reduce((acc, cond, i) =>
-			i === 0 ? cond : sql`${acc} OR ${cond}`
-		);
 
-		const rows = await sql`SELECT * FROM urls WHERE ${whereClause} AND mature=false`;
 
-		return json({ results: rows || [], error: null });
+		return json({ results: data || [], error: null });
 	} catch (err: any) {
 		console.error('DB Error:', err?.message || err);
 		return json({ results: [], error: 'Internal Server Error' }, { status: 500 });

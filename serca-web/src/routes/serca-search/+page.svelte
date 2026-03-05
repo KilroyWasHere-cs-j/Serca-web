@@ -8,7 +8,7 @@
 
 	let states = {
 		// Initialize state properties here
-		unlocked: false,
+		unlocked: true,
 		baduser: false,
 		limitHit: false,
 		showResults: false,
@@ -60,7 +60,8 @@
 			body: JSON.stringify({ search })
 		});
 	}
-
+	
+	// This function is called every time a user makes a search. It increments the user's query count and checks if they've hit their limit.
 	async function increaseUserCount() {
 		let lemail = user.email;
 		const res = await fetch('/api/data/setuserqcount', {
@@ -86,6 +87,7 @@
 		}
 	}
 
+	// This function sends the user's prompt to the AI and processes the response. If the response includes a "SET" command, it extracts the filters and queries the database.
 	async function sendPrompt(userprompt: string) {
 		const prompt = `You are **Serca**, an AI-powered media search assistant.
 		Select the top 5 best matches that relate to the user's query. Suggest terms to enhance a users query
@@ -127,9 +129,10 @@
 		return response;
 	}
 
+	// This function is called when the user submits a search. It sends the prompt to the AI and, if the AI responds with filters, it queries the database.
 	async function handleSearch() {
 		console.log('Handling Search');
-		sendPrompt('woman swimming');
+		//sendPrompt('woman swimming');
 
 		if (!database.query || states.searching) return;
 		let filters = database.query.split(' ');
@@ -139,14 +142,13 @@
 	//async function queryDatabase(filters) {
 	async function queryDatabase(extracted_filters: string[]) {
 		let filters = {
-			keywords: [...extracted_filters],
+			keywords: ["one piece", "anime", "pirate", "adventure"],
 			mature: false,
 			child: false
 		};
-		console.log(filters);
 		try {
 			console.log('Query running');
-			const res = await fetch('/api/data/searchwhere', {
+			const res = await fetch('/api/data/search', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ filters })
@@ -184,8 +186,8 @@
 				return data.error || 'Validation failed.';
 			}
 		} catch (err) {
-			return 'Network or server error.';
 			console.error('err', err);
+			return 'Network or server error.';
 		}
 	}
 </script>
