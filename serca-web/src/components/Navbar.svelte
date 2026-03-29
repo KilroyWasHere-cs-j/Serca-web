@@ -9,17 +9,20 @@
   ];
 </script>
 
-<nav class="flex justify-center border-b border-gray-100 bg-white py-6">
-  <div class="flex items-center gap-8">
+<nav class="flex justify-center bg-indigo-950 py-8 shadow-xl">
+  <div class="flex items-center gap-10">
     {#each navLinks as link}
       <a
         href={link.href}
         target={link.external ? "_blank" : "_self"}
         rel={link.external ? "noreferrer" : ""}
-        class="group relative text-sm font-medium tracking-wide text-gray-500 transition-colors duration-200 hover:text-black"
+        class="group relative text-xs font-bold uppercase tracking-[0.2em] text-indigo-200 transition-colors duration-300 hover:text-white"
       >
         {link.name}
-        <span class="absolute -bottom-1 left-0 h-px w-0 bg-black transition-all duration-300 group-hover:w-full"></span>
+        
+        <span 
+          class="absolute -bottom-2 left-1/2 h-0.5 w-0 -translate-x-1/2 bg-white transition-all duration-300 group-hover:w-full"
+        ></span>
       </a>
     {/each}
   </div>
