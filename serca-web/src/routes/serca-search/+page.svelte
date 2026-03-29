@@ -168,6 +168,10 @@
     async function handleSearch() {
         if (!search.query.trim() || search.searching) return;
         const q = search.query.trim();
+		if (q.length < 10) {
+			search.error = 'Query is too short. Please limit to 10 words.';
+			return;
+		}
         history.past_queries = [q, ...history.past_queries].slice(0, 25);
         const filters: Filters = { keywords: normalizeKeywords(q), mature: false, child: false };
 

@@ -60,10 +60,10 @@
   <!-- Header / meta -->
   <div class="mb-4 rounded-2xl border bg-white p-5 shadow-sm">
     <div class="flex flex-wrap items-center justify-between gap-3">
-      <div>
+      <!-- <div>
         <div class="text-sm text-gray-500">Query</div>
         <div class="text-lg font-semibold text-gray-900">{db.query ?? "—"}</div>
-      </div>
+      </div> -->
 
       <div class="flex flex-wrap items-center gap-2">
         <span
