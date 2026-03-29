@@ -9,7 +9,7 @@
   ];
 </script>
 
-<nav class="flex justify-center bg-indigo-950 py-8 shadow-xl">
+<nav class="flex justify-center bg-violet-800 py-8 shadow-xl">
   <div class="flex items-center gap-10">
     {#each navLinks as link}
       <a
