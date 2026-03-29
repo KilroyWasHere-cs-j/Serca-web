@@ -226,36 +226,44 @@ ${userprompt}`;
 	 * Executes backend search and writes result into state.
 	 * ✅ Sorts `resolved` by similarity (desc) before rendering.
 	 */
-	async function runSearch(filters: Filters) {
-		search.searching = true;
-		search.error = '';
-		search.result = null;
+/**
+     * Executes backend search and writes result into state.
+     * ✅ Sorts `resolved` by similarity (descending) for "Confidence Level" ordering.
+     */
+    async function runSearch(filters: Filters) {
+        search.searching = true;
+        search.error = '';
+        search.result = null;
 
-		const r = await apiPost<SearchResponse>('/api/data/search', { filters });
+        const r = await apiPost<SearchResponse>('/api/data/search', { filters });
 
-		if (!r.ok || !r.data) {
-			search.error = r.error || 'Search failed';
-			search.searching = false;
-			return;
-		}
+        if (!r.ok || !r.data) {
+            search.error = r.error || 'Search failed';
+            search.searching = false;
+            return;
+        }
 
-		// ✅ Sort by similarity (highest first).
-		// Use a stable-sort pattern (decorate -> sort -> undecorate) so ties keep API order.
-		const original = Array.isArray(r.data.resolved) ? r.data.resolved : [];
-		const resolved = original
-			.map((item, idx) => ({ item, idx }))
-			.sort((a, b) => {
-				const as = a.item.similarity ?? -Infinity;
-				const bs = b.item.similarity ?? -Infinity;
-				if (bs !== as) return bs - as;
-				return a.idx - b.idx; // tie-breaker preserves original order
-			})
-			.map((x) => x.item);
+        // 1. Ensure we have an array to work with
+        const original = Array.isArray(r.data.resolved) ? r.data.resolved : [];
 
-		// ✅ Keep the original response but replace resolved with sorted
-		search.result = { ...r.data, resolved };
-		search.searching = false;
-	}
+        // 2. Sort by confidence/similarity (highest first)
+        const sortedResolved = [...original].sort((a, b) => {
+            // Default to 0 if similarity is undefined/null
+            const scoreA = a.similarity ?? 0;
+            const scoreB = b.similarity ?? 0;
+
+            // Descending order: higher scores move to index 0
+            return scoreB - scoreA;
+        });
+
+        // 3. Update state with sorted results
+        search.result = { 
+            ...r.data, 
+            resolved: sortedResolved 
+        };
+        
+        search.searching = false;
+    }
 
 	/**
 	 * Form submit handler:
