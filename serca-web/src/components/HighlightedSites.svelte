@@ -6,22 +6,6 @@
 			url: 'https://www.papytane.com/mp4/',
 			note: 'This is a collection of what seem like home videos and family trips in French speaking contries'
 		}
-		// {
-		// 	title: 'The Old Internet',
-		// 	url: 'https://theoldnet.com/',
-		// 	note: 'A cool collection of old archived websites'
-		// },
-		// { title: '4chan', url: 'https://www.4chan.org', note: 'Well this was cool til it got hacked' },
-		// {
-		// 	title: 'Craigslist',
-		// 	url: 'https://www.craigslist.org',
-		// 	note: 'This is a modern site that looks old'
-		// },
-		// {
-		// 	title: 'ASCII Art Archive',
-		// 	url: 'https://www.asciiart.eu',
-		// 	note: 'ASCII art is cool, man...'
-		// }
 	];
 </script>
 
