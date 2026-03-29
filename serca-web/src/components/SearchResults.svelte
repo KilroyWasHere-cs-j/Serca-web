@@ -18,6 +18,23 @@
 
   export let db: SearchResponse | null = null;
 
+  // Static Text Configuration
+  const TEXT = {
+    emptyState: "Run a search to see results.",
+    noResults: "No matches found.",
+    untitled: "Untitled",
+    labels: {
+      results: "results",
+      id: "ID",
+      similarity: "Similarity",
+      open: "Open",
+      readMore: "Read more",
+      readLess: "Read less",
+      statusUnknown: "Unknown",
+      success: "Success"
+    }
+  };
+
   const clampLen = 240;
   let expanded: Record<string, boolean> = {};
 
@@ -39,7 +56,6 @@
   function simPct(sim: any) {
     const n = Number(sim);
     if (!Number.isFinite(n)) return null;
-    // similarity is 0..1, clamp just in case
     const p = Math.max(0, Math.min(1, n)) * 100;
     return Math.round(p);
   }
@@ -54,28 +70,22 @@
 
 {#if !db}
   <div class="rounded-2xl border border-dashed p-6 text-sm text-gray-600">
-    Run a search to see results.
+    {TEXT.emptyState}
   </div>
 {:else}
-  <!-- Header / meta -->
   <div class="mb-4 rounded-2xl border bg-white p-5 shadow-sm">
     <div class="flex flex-wrap items-center justify-between gap-3">
-      <!-- <div>
-        <div class="text-sm text-gray-500">Query</div>
-        <div class="text-lg font-semibold text-gray-900">{db.query ?? "—"}</div>
-      </div> -->
-
       <div class="flex flex-wrap items-center gap-2">
         <span
           class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium"
-          class:text-green-700={db.code === "Success"}
-          class:bg-green-50={db.code === "Success"}
-          class:border-green-200={db.code === "Success"}
-          class:text-gray-700={db.code !== "Success"}
-          class:bg-gray-50={db.code !== "Success"}
-          class:border-gray-200={db.code !== "Success"}
+          class:text-green-700={db.code === TEXT.labels.success}
+          class:bg-green-50={db.code === TEXT.labels.success}
+          class:border-green-200={db.code === TEXT.labels.success}
+          class:text-gray-700={db.code !== TEXT.labels.success}
+          class:bg-gray-50={db.code !== TEXT.labels.success}
+          class:border-gray-200={db.code !== TEXT.labels.success}
         >
-          {db.code ?? "Unknown"}
+          {db.code ?? TEXT.labels.statusUnknown}
         </span>
 
         {#if db.datetime}
@@ -85,16 +95,15 @@
         {/if}
 
         <span class="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs text-gray-700">
-          {(db.resolved?.length ?? 0)} results
+          {(db.resolved?.length ?? 0)} {TEXT.labels.results}
         </span>
       </div>
     </div>
   </div>
 
-  <!-- Results list -->
   {#if !db.resolved || db.resolved.length === 0}
     <div class="rounded-2xl border border-dashed p-6 text-sm text-gray-600">
-      No matches found.
+      {TEXT.noResults}
     </div>
   {:else}
     <div class="space-y-4">
@@ -103,16 +112,16 @@
           <div class="flex items-start justify-between gap-4">
             <div class="min-w-0">
               <h3 class="truncate text-lg font-semibold text-gray-900">
-                {item.name ?? "Untitled"}
+                {item.name ?? TEXT.untitled}
               </h3>
               <div class="mt-1 flex flex-wrap gap-2 text-xs text-gray-500">
-                <span>ID: {item.id ?? idx}</span>
+                <span>{TEXT.labels.id}: {item.id ?? idx}</span>
 
                 {#if item.similarity !== undefined}
                   {#if simPct(item.similarity) !== null}
-                    <span>Similarity: {simPct(item.similarity)}%</span>
+                    <span>{TEXT.labels.similarity}: {simPct(item.similarity)}%</span>
                   {:else}
-                    <span>Similarity: {String(item.similarity)}</span>
+                    <span>{TEXT.labels.similarity}: {String(item.similarity)}</span>
                   {/if}
                 {/if}
               </div>
@@ -125,7 +134,7 @@
                 rel="noreferrer"
                 class="shrink-0 rounded-xl border px-3 py-1.5 text-sm font-medium text-gray-800 hover:bg-gray-50"
               >
-                Open
+                {TEXT.labels.open}
               </a>
             {/if}
           </div>
@@ -136,7 +145,7 @@
                 <div
                   class="h-full bg-gray-900"
                   style={`width: ${simPct(item.similarity)}%`}
-                  aria-label="Similarity"
+                  aria-label={TEXT.labels.similarity}
                 />
               </div>
             </div>
@@ -154,7 +163,7 @@
                   class="mt-2 text-sm font-medium text-gray-900 underline decoration-gray-300 underline-offset-4 hover:decoration-gray-500"
                   on:click={() => toggle(item, idx)}
                 >
-                  {expanded[keyFor(item, idx)] ? "Read less" : "Read more"}
+                  {expanded[keyFor(item, idx)] ? TEXT.labels.readLess : TEXT.labels.readMore}
                 </button>
               {/if}
             </div>

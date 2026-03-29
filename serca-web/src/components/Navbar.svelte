@@ -1,17 +1,26 @@
 <script lang="ts">
+  const navLinks = [
+    { name: "Home", href: "/" },
+    { name: "Search", href: "/serca-search" },
+    { name: "Sign-Up", href: "/sign-up" },
+    { name: "Info", href: "/info" },
+    { name: "Report", href: "/report" },
+    { name: "Abscissa", href: "https://www.abscissa.dev/home", external: true },
+  ];
 </script>
 
-<div class="flex justify-center">
-	<div class="flex flex-col">
-		<a href="/" class="text-lg transition duration-300 hover:text-purple-500">Home</a>
-		<a href="/serca-search" class="text-lg transition duration-300 hover:text-purple-500">Search</a>
-		<a href="/sign-up" class="text-lg transition duration-300 hover:text-purple-500">Sign-Up</a>
-		<a href="/info" class="text-lg transition duration-300 hover:text-purple-500">Info</a>
-		<a href="/report" class="text-lg transition duration-300 hover:text-purple-500">Report</a>
-		<!-- <a href="/info" class="text-lg transition duration-300 hover:text-purple-500">Info</a> -->
-		<a
-			href="https://www.abscissa.dev/home"
-			class="text-lg transition duration-300 hover:text-purple-500">Abscissa</a
-		>
-	</div>
-</div>
+<nav class="flex justify-center border-b border-gray-100 bg-white py-6">
+  <div class="flex items-center gap-8">
+    {#each navLinks as link}
+      <a
+        href={link.href}
+        target={link.external ? "_blank" : "_self"}
+        rel={link.external ? "noreferrer" : ""}
+        class="group relative text-sm font-medium tracking-wide text-gray-500 transition-colors duration-200 hover:text-black"
+      >
+        {link.name}
+        <span class="absolute -bottom-1 left-0 h-px w-0 bg-black transition-all duration-300 group-hover:w-full"></span>
+      </a>
+    {/each}
+  </div>
+</nav>
