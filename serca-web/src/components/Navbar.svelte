@@ -4,7 +4,7 @@
     { name: "Search", href: "/serca-search" },
     { name: "Sign-Up", href: "/sign-up" },
     { name: "Info", href: "/info" },
-    { name: "Report", href: "/report" },
+    // { name: "Report", href: "/report" },
     { name: "Abscissa", href: "https://www.abscissa.dev/home", external: true },
   ];
 </script>
